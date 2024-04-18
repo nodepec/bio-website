@@ -1,12 +1,10 @@
 @import url(https://fonts.googleapis.com/css2?family=Poppins);
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
-
 .header {
     position: fixed;
     top: 0;
@@ -18,13 +16,11 @@
     align-items: center;
     z-index: 99;
 }
-
 .header .logo {
     font-size: 1.7em;
     color: #fff;
     text-decoration: none;
 }
-
 .nav a {
     position: relative;
     font-size: 1.1em;
@@ -32,7 +28,6 @@
     text-decoration: none;
     margin-left: 40px;
 }
-
 .nav a::after {
     content: '';
     position: absolute;
@@ -45,11 +40,9 @@
     transform: scaleX(0);
     transition: .5s;
 }
-
 .nav a:hover::after {
     transform: scaleX(1)
 }
-
 .home {
     position: relative;
     width: 100%;
@@ -62,21 +55,17 @@
     align-items: center;
     padding: 80px 100px 0;
 }
-
 .home .content {
     max-width: 600px;
     color: #fff;
 }
-
 .content h2 {
     font-size: 3em;
     letter-spacing: .03em;
 }
-
 .content p {
     margin: 10px 0 40px;
 }
-
 .content a {
     color: #fff;
     text-decoration: none;
@@ -86,7 +75,26 @@
     border-radius: 40px;
     transition: .5s;
 }
-
 .content a:hover {
     background: #D3D3D3
+}
+body {
+    border-radius: 20px;
+}
+body {
+    background-color: #080808;
+}
+.container {
+    width: 560px;
+    height: 315px;
+    position: absolute;
+    top: 320px;
+    left: 69%;
+    transform: translateX(-50%);
+    margin-top: 20px; /* Adjust the top margin as needed */
+    overflow: hidden;
+    border-radius: 10px; /* Optional: Add rounded corners to the border */
+    border: 2px solid #640e96;
+    box-shadow: 0 0 10px #640e96,
+                0 0 50px #640e96;
 }
