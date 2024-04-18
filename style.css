@@ -4,14 +4,12 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
-
 .about {
     min-height: 100vh;
     width: 100%;
     padding: 78px 0;
     background-color: #191919;
 }
-
 .main {
     width: 1200px;
     max-width: 95%;
@@ -27,25 +25,21 @@
     transition: .4s ease;
     padding: 49px;
 }
-
 .about-text h1 {
     color: #fff;
     font-size: 80px;
     text-transform: capitalize;
     margin-bottom: 20px;
 }
-
 .about-text h5 {
     color: #fff;
     font-size: 28px;
     text-transform: 25px;
     margin-bottom: 0.4em;
 }
-
 span {
     color: #640e96;
 }
-
 .about-text p {
     color: #fff;
     letter-spacing: 1px;
@@ -53,7 +47,6 @@ span {
     font-size: 18px;
     margin-bottom: 45px;
 }
-
 button {
     background: transparent;
     color: #640e96;
@@ -65,7 +58,6 @@ button {
     border-radius: 30px;
     transition: .4 ease;
 }
-
 button:hover {
     background: #640e96;
     color: #fff;
@@ -75,11 +67,9 @@ button:hover {
     cursor: pointer;
     transform: scale(1.1);
 }
-
 .My-Youtube {
     margin-left: 0.5em;
 }
-
 .header {
     position: fixed;
     top: 0;
@@ -91,13 +81,11 @@ button:hover {
     align-items: center;
     z-index: 99;
 }
-
 .header .logo {
     font-size: 1.7em;
     color: #fff;
     text-decoration: none;
 }
-
 .nav a {
     position: relative;
     font-size: 1.1em;
@@ -105,7 +93,6 @@ button:hover {
     text-decoration: none;
     margin-left: 40px;
 }
-
 .nav a::after {
     content: '';
     position: absolute;
@@ -118,7 +105,12 @@ button:hover {
     transform: scaleX(0);
     transition: .5s;
 }
-
 .nav a:hover::after {
     transform: scaleX(1);
+}
+body {
+    border-radius: 20px;
+}
+body {
+    background-color: #080808;
 }
