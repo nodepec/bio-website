@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <meta charset="UTF-8">
-     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Home</title>
-     <link rel="stylesheet" href="index.css">
-     <link rel="icon" type="url" href="">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" href="path_to_your_favicon.ico" type="image/x-icon">
 </head>
 <body>
-
-    
     <header class="header">
         <a href="#" class="logo"><ion-icon name="construct-outline"></ion-icon>yxha</a>
-<div class="nav-toggle">
-    <ion-icon name="menu-outline"></ion-icon>
-</div>
         <nav class="nav">
             <a href="index.html">Home</a>
             <a href="About.html">About</a>
@@ -23,22 +18,51 @@
             <a href="Contact.html">Contact</a>
         </nav>
     </header>
-    </div>
+
     <section class="page show"></section>
     <section class="home">
         <div class="content">
             <h2>Yxha's official site</h2>
-            <p>Welcome this is where I upload my content and work.</p>
+            <p>Welcome, this is where I upload my content and work.</p>
             <a href="Media.html">Get Started</a>
         </div>
     </section>
 
-    <div class="container">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/Gp0NUI7kwGk?si=L5PDAU0TynGGu3j2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="video-background">
+        <div class="video-foreground">
+            <iframe src="https://www.youtube.com/embed/rcoHb8gnrbM?autoplay=1&mute=1&controls=0&loop=1&playlist=rcoHb8gnrbM"
+                    frameborder="0"
+                    allow="autoplay; fullscreen"
+                    allowfullscreen></iframe>
+        </div>
     </div>
 
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="scripts.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const links = document.querySelectorAll("nav a");
+            links.forEach(link => {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    const href = this.getAttribute("href");
+                    document.body.style.transition = "opacity 0.5s ease, transform 0.5s ease, border-radius 0.5s ease";
+                    document.body.style.opacity = 0;
+                    document.body.style.transform = "scale(0.95)";
+                    document.body.style.borderRadius = "20px";
+                    setTimeout(function() {
+                        window.location.href = href;
+                    }, 500);
+                });
+            });
+        });
+
+        window.addEventListener("load", function() {
+            document.body.style.opacity = 1;
+            document.body.style.transform = "scale(1)";
+            document.body.style.borderRadius = "0";
+        });
+    </script>
 </body>
 </html>
