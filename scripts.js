@@ -13,15 +13,17 @@ document.addEventListener("DOMContentLoaded", function() {
             }, 500);
         });
     });
+
+    const navToggle = document.querySelector('.nav-toggle');
+    const nav = document.querySelector('.nav');
+
+    navToggle.addEventListener('click', () => {
+        nav.classList.toggle('active');
+    });
 });
+
 window.addEventListener("load", function() {
     document.body.style.opacity = 1;
     document.body.style.transform = "scale(1)";
     document.body.style.borderRadius = "0";
-});
-const navToggle = document.querySelector('.nav-toggle');
-const nav = document.querySelector('.nav');
-
-navToggle.addEventListener('click', () => {
-    nav.classList.toggle('active');
 });
