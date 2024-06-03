@@ -47,9 +47,6 @@
     position: relative;
     width: 100%;
     height: 100vh;
-    background: url(https://cdn.discordapp.com/attachments/1228577174609465448/1229732528085008424/bg3.jpg?ex=6630c0aa&is=661e4baa&hm=b40a0affc7255d27ee402cd7277205812342d1577a436bd54c3d78ad32b10a0c&) no-repeat;
-    background-size: cover;
-    background-position: center;
     display: flex;
     justify-content: space-between;
     align-items: center;
