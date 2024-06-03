@@ -32,3 +32,8 @@
     text-decoration: none;
     margin-bottom: 10px; /* Adjust spacing between links */
 }
+@media (max-width: 768px) {
+    .header {
+        padding: 20px 10px; /* Adjust padding for smaller screens */
+    }
+}
