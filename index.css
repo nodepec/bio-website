@@ -1,97 +1,34 @@
-@import url(https://fonts.googleapis.com/css2?family=Poppins);
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
 .header {
     position: fixed;
     top: 0;
-    left: -25px;
+    left: 0;
     width: 100%;
-    padding: 20px 100px;
+    padding: 20px 20px; /* Adjust padding for smaller screens */
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 99;
 }
-.header .logo {
-    font-size: 1.7em;
-    color: #fff;
-    text-decoration: none;
+
+.nav {
+    display: none; /* Hide navigation links by default */
 }
+
+/* Show navigation links when toggled (e.g., hamburger menu) */
+.nav.active {
+    display: flex;
+    flex-direction: column;
+    background-color: #080808; /* Adjust background color if needed */
+    position: absolute;
+    top: 80px; /* Adjust top position to avoid overlapping header */
+    left: 0;
+    width: 100%;
+    padding: 20px;
+}
+
 .nav a {
-    position: relative;
     font-size: 1.1em;
     color: #fff;
     text-decoration: none;
-    margin-left: 40px;
-}
-.nav a::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -6px;
-    width: 100%;
-    height: 3px;
-    background: #fff;
-    border-radius: 5px;
-    transform: scaleX(0);
-    transition: .5s;
-}
-.nav a:hover::after {
-    transform: scaleX(1)
-}
-.home {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 80px 100px 0;
-}
-.home .content {
-    max-width: 600px;
-    color: #fff;
-}
-.content h2 {
-    font-size: 3em;
-    letter-spacing: .03em;
-}
-.content p {
-    margin: 10px 0 40px;
-}
-.content a {
-    color: #fff;
-    text-decoration: none;
-    border: 2px solid #fff;
-    font-weight: 500;
-    padding: 10px 40px;
-    border-radius: 40px;
-    transition: .5s;
-}
-.content a:hover {
-    background: #D3D3D3
-}
-body {
-    border-radius: 20px;
-}
-body {
-    background-color: #080808;
-}
-.container {
-    width: 560px;
-    height: 315px;
-    position: absolute;
-    top: 320px;
-    left: 69%;
-    transform: translateX(-50%);
-    margin-top: 20px; /* Adjust the top margin as needed */
-    overflow: hidden;
-    border-radius: 10px; /* Optional: Add rounded corners to the border */
-    border: 2px solid #640e96;
-    box-shadow: 0 0 10px #640e96,
-                0 0 50px #640e96;
+    margin-bottom: 10px; /* Adjust spacing between links */
 }
