@@ -201,11 +201,19 @@ body {
 @media (max-width: 768px) {
     .header {
         padding: 20px 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .logo {
+        margin-bottom: 10px;
     }
 
     .nav {
-        flex-wrap: wrap;
-        justify-content: center;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .home, .content-section {
