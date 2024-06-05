@@ -86,7 +86,6 @@ body {
     justify-content: center;
     flex-direction: column;
     padding: 50px;
-    border: 2px solid #640e96;
     box-shadow: 0 0 5px #640e96, 0 0 25px #640e96;
     border-radius: 40px;
     transition: .4s ease;
@@ -100,9 +99,8 @@ body {
     text-align: center;
 }
 
-.media-text h5 {
+.media-text p {
     color: #fff;
-    font-size: 24px;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -201,12 +199,16 @@ body {
         font-size: 2.5em;
     }
 
-    .media-text h5 {
+    .media-text p {
         font-size: 1.2em;
     }
 
     .main {
         padding: 30px;
+    }
+
+    .video-container {
+        padding-bottom: 75%; /* Increase size for mobile */
     }
 }
 
@@ -215,7 +217,11 @@ body {
         font-size: 2em;
     }
 
-    .media-text h5 {
+    .media-text p {
         font-size: 1em;
+    }
+
+    .video-container {
+        padding-bottom: 85%; /* Further increase size for smaller screens */
     }
 }
