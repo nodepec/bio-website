@@ -5,64 +5,32 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <link rel="stylesheet" href="index.css">
-    <link rel="icon" href="path_to_your_favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="styles/index.css">
+    <link rel="icon" href="assets/path_to_your_favicon.ico">
 </head>
-<body>
+<body class="gradient-animation">
     <header class="header">
-        <a href="#" class="logo"><ion-icon name="construct-outline"></ion-icon>yxha</a>
+        <a href="index.html" class="logo"><ion-icon name="construct-outline"></ion-icon>yxha</a>
         <nav class="nav">
             <a href="index.html">Home</a>
-            <a href="About.html">About</a>
-            <a href="Media.html">Media</a>
-            <a href="Contact.html">Contact</a>
+            <a href="about.html">About</a>
+            <a href="media.html">Media</a>
+            <a href="contact.html">Contact</a>
         </nav>
     </header>
 
-    <section class="page show"></section>
     <section class="home">
         <div class="content">
-            <h2>Yxha's official site</h2>
+            <h2 class="animated-text">Yxha's official site</h2>
             <p>Welcome, this is where I upload my content and work.</p>
-            <a href="Media.html">Get Started</a>
+            <a href="media.html" class="main-button">Get Started</a>
         </div>
     </section>
 
-    <div class="video-background">
-        <div class="video-foreground">
-            <iframe src="https://www.youtube.com/embed/rcoHb8gnrbM?autoplay=1&mute=1&controls=0&loop=1&playlist=rcoHb8gnrbM"
-                    frameborder="0"
-                    allow="autoplay; fullscreen"
-                    allowfullscreen></iframe>
-        </div>
-    </div>
+    <div id="loading-spinner" class="spinner"></div>
 
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <script src="scripts.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const links = document.querySelectorAll("nav a");
-            links.forEach(link => {
-                link.addEventListener("click", function(event) {
-                    event.preventDefault();
-                    const href = this.getAttribute("href");
-                    document.body.style.transition = "opacity 0.5s ease, transform 0.5s ease, border-radius 0.5s ease";
-                    document.body.style.opacity = 0;
-                    document.body.style.transform = "scale(0.95)";
-                    document.body.style.borderRadius = "20px";
-                    setTimeout(function() {
-                        window.location.href = href;
-                    }, 500);
-                });
-            });
-        });
-
-        window.addEventListener("load", function() {
-            document.body.style.opacity = 1;
-            document.body.style.transform = "scale(1)";
-            document.body.style.borderRadius = "0";
-        });
-    </script>
+    <script src="scripts/scripts.js"></script>
 </body>
 </html>
