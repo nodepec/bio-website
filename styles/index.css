@@ -49,12 +49,20 @@ body {
     text-decoration: none;
 }
 
+.nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+}
+
 .nav a {
     position: relative;
     font-size: 1.1em;
     color: #fff;
     text-decoration: none;
-    margin-left: 40px;
+    margin: 0 10px;
 }
 
 .nav a::after {
@@ -84,6 +92,7 @@ body {
     padding: 0 20px;
     z-index: 2;
     text-align: center;
+    flex-direction: column; /* Ensure column layout for main content */
 }
 
 .content {
@@ -139,8 +148,7 @@ body {
     transition: .4s ease;
     background: none;
     cursor: pointer;
-    display: block; /* Ensure block display to center the button */
-    margin: 0 auto; /* Center the button */
+    display: inline-block; /* Ensure block display to center the button */
     position: relative;
     overflow: hidden; /* Ensures ripple is contained */
 }
@@ -195,18 +203,13 @@ body {
         padding: 20px 10px;
     }
 
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
     .home, .content-section {
         padding: 80px 20px 0;
-    }
-
-    .nav {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .nav a {
-        margin-bottom: 10px;
-        margin-right: 0;
     }
 
     .content h2 {
@@ -222,8 +225,9 @@ body {
     }
 
     .social-icons {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
+        flex-wrap: wrap;
     }
 
     .social-icon {
