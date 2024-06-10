@@ -24,7 +24,7 @@ body {
     justify-content: space-between;
     align-items: center;
     z-index: 99;
-    background-color: #080808; /* Optional: Add background color to header */
+    background-color: #080808; /* Add background color to header */
 }
 
 .header .logo {
