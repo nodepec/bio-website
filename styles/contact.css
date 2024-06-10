@@ -1,10 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
 
-body {
-    opacity: 0; /* Initially hidden */
-    transition: opacity 0.5s ease; /* Ensure transition is set here as well */
-}
-
 * {
     padding: 0;
     margin: 0;
@@ -15,6 +10,8 @@ body {
 body {
     background-color: #080808;
     color: #fff;
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.5s ease; /* Ensure transition is set here as well */
 }
 
 .header {
@@ -22,7 +19,7 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    padding: 20px 100px;
+    padding: 20px 100px; /* Adjusted padding to match other pages */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -69,15 +66,15 @@ body {
     transform: scaleX(1);
 }
 
-.contact {
+.contact-section {
     min-height: 100vh;
     width: 100%;
     padding: 78px 0;
     background-color: #191919;
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Center content vertically */
 }
 
 .main {
@@ -89,8 +86,7 @@ body {
     justify-content: center;
     flex-direction: column;
     padding: 50px;
-    border: 2px solid #640e96;
-    box-shadow: 0 0 5px #640e96, 0 0 25px #640e96;
+    box-shadow: none; /* Remove box shadow */
     border-radius: 40px;
     transition: .4s ease;
 }
@@ -103,31 +99,27 @@ body {
     text-align: center;
 }
 
-.buttons {
+.contact-text p {
+    color: #fff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.social-icons {
     display: flex;
     justify-content: center;
     gap: 20px;
 }
 
-button {
-    background: transparent;
-    color: #640e96;
-    font-size: 16px;
-    text-decoration: none;
-    border: 2px solid #640e96;
-    font-weight: bold;
-    padding: 13px 30px;
-    border-radius: 30px;
-    transition: .4s ease;
+.social-icon {
+    font-size: 3em;
+    color: #fff;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
-button:hover {
-    background: #640e96;
-    color: #fff;
-    border: 2px solid #640e96;
-    box-shadow: 0 0 5px #640e96, 0 0 25px #640e96;
-    cursor: pointer;
-    transform: scale(1.1);
+.social-icon:hover {
+    color: #ff00ff;
+    text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff;
 }
 
 .spinner {
@@ -181,14 +173,22 @@ button:hover {
 @media (max-width: 768px) {
     .header {
         padding: 20px 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .logo {
+        margin-bottom: 10px;
     }
 
     .nav {
-        flex-wrap: wrap;
-        justify-content: center;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    .contact {
+    .contact-section {
         padding: 80px 20px 0;
     }
 
@@ -196,17 +196,21 @@ button:hover {
         font-size: 2.5em;
     }
 
-    .main {
-        padding: 30px;
+    .contact-text p {
+        font-size: 1.2em;
     }
 
-    button {
-        padding: 10px 20px;
+    .main {
+        padding: 30px;
     }
 }
 
 @media (max-width: 480px) {
     .contact-text h1 {
         font-size: 2em;
+    }
+
+    .contact-text p {
+        font-size: 1em;
     }
 }
