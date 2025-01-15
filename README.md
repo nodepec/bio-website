@@ -1,3 +1,3 @@
 - 👋 Hi, I’m @nodepec
 - 👀 I’m interested in web development
-- 🌱 I’m currently learning css, html, javascript
+- 🌱 I’m currently learning css, html, javascript and express.js
