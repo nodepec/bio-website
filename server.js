@@ -11,7 +11,7 @@ const PORT = 3000;
 // Apply Gzip compression
 app.use(compression());
 
-// Set up security headers with Helmet, including CSP
+// Set up Helmet with relaxed CSP for YouTube and "Connect With Me" buttons
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -21,13 +21,18 @@ app.use(
           "'self'",
           "https://www.youtube.com",
           "https://www.youtube-nocookie.com",
+          "'unsafe-inline'", // Allow inline scripts for dynamic elements
         ],
-        styleSrc: ["'self'", "'unsafe-inline'"], // Allows inline CSS if used
         frameSrc: [
           "https://www.youtube.com",
           "https://www.youtube-nocookie.com",
         ],
-        imgSrc: ["'self'", "https://i.ytimg.com"],
+        imgSrc: [
+          "'self'",
+          "https://i.ytimg.com", // YouTube thumbnails
+          "https://*.gravatar.com", // For avatars (if used in buttons)
+        ],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for buttons
         connectSrc: ["'self'"],
         objectSrc: ["'none'"], // Block plugins like Flash
         upgradeInsecureRequests: [], // Force HTTPS for all HTTP resources
@@ -39,10 +44,10 @@ app.use(
 // Log HTTP requests
 app.use(morgan('combined'));
 
-// Limit repeated requests to public APIs and endpoints
+// Limit repeated requests
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+  max: 100, // Limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
 
@@ -54,7 +59,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve sitemap.xml for SEO
+// Serve sitemap.xml
 app.get('/sitemap.xml', (req, res) => {
   res.type('application/xml');
   res.send(`
@@ -67,13 +72,13 @@ app.get('/sitemap.xml', (req, res) => {
   `);
 });
 
-// Serve robots.txt for search engines
+// Serve robots.txt
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.send('User-agent: *\nDisallow:');
 });
 
-// Custom 404 page for unmatched routes
+// Custom 404 page
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
