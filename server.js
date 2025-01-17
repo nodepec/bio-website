@@ -1,64 +1,37 @@
 const express = require('express');
-const path = require('path');
-const compression = require('compression');
 const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 const app = express();
 const PORT = 3000;
 
-// Middleware for Gzip compression
-app.use(compression());
+// Set up Helmet with custom CSP
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
+        frameSrc: ["https://www.youtube.com", "https://www.youtube-nocookie.com"],
+        imgSrc: ["'self'", "https://i.ytimg.com"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"], // Disallow Flash and other plugins
+        upgradeInsecureRequests: [], // Enforce HTTPS for all requests
+      },
+    },
+  })
+);
 
-// Middleware for adding security headers
-app.use(helmet());
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware for logging requests
-app.use(morgan('combined'));
-
-// Rate limiting middleware
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
-
-// Serve static files with caching
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
-
-// Serve the main page
+// Main route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Serve a 404 page for unmatched routes
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-});
-
-// Serve a sitemap
-app.get('/sitemap.xml', (req, res) => {
-    res.type('application/xml');
-    res.send(`
-        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-            <url>
-                <loc>http://localhost:${PORT}/</loc>
-                <priority>1.0</priority>
-            </url>
-        </urlset>
-    `);
-});
-
-// Redirect HTTP to HTTPS (if needed)
-app.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] !== 'https') {
-        return res.redirect(`https://${req.headers.host}${req.url}`);
-    }
-    next();
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
