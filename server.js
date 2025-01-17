@@ -59,25 +59,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve sitemap.xml
-app.get('/sitemap.xml', (req, res) => {
-  res.type('application/xml');
-  res.send(`
-    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-        <url>
-            <loc>http://localhost:${PORT}/</loc>
-            <priority>1.0</priority>
-        </url>
-    </urlset>
-  `);
-});
-
-// Serve robots.txt
-app.get('/robots.txt', (req, res) => {
-  res.type('text/plain');
-  res.send('User-agent: *\nDisallow:');
-});
-
 // Custom 404 page
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
