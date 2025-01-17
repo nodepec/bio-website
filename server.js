@@ -50,12 +50,6 @@ app.get('/sitemap.xml', (req, res) => {
     `);
 });
 
-// Serve a robots.txt file
-app.get('/robots.txt', (req, res) => {
-    res.type('text/plain');
-    res.send('User-agent: *\nDisallow:');
-});
-
 // Redirect HTTP to HTTPS (if needed)
 app.use((req, res, next) => {
     if (req.headers['x-forwarded-proto'] !== 'https') {
