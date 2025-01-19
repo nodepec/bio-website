@@ -11,7 +11,7 @@ const PORT = 3000;
 // Apply Gzip compression
 app.use(compression());
 
-// Set up Helmet with relaxed CSP for YouTube and "Connect With Me" buttons
+// Set up Helmet with a relaxed CSP for YouTube and buttons
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -21,7 +21,6 @@ app.use(
           "'self'",
           "https://www.youtube.com",
           "https://www.youtube-nocookie.com",
-          "'unsafe-inline'", // Allow inline scripts for dynamic elements
         ],
         frameSrc: [
           "https://www.youtube.com",
@@ -30,36 +29,57 @@ app.use(
         imgSrc: [
           "'self'",
           "https://i.ytimg.com", // YouTube thumbnails
-          "https://*.gravatar.com", // For avatars (if used in buttons)
         ],
-        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for buttons
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'", // Allow inline styles for buttons and dynamic content
+        ],
         connectSrc: ["'self'"],
         objectSrc: ["'none'"], // Block plugins like Flash
-        upgradeInsecureRequests: [], // Force HTTPS for all HTTP resources
+        upgradeInsecureRequests: [], // Force HTTPS for all resources
       },
     },
   })
 );
 
-// Log HTTP requests
+// Log HTTP requests for debugging
 app.use(morgan('combined'));
 
-// Limit repeated requests
+// Limit repeated requests to prevent abuse
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
 
-// Serve static files
+// Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
 
-// Main route (index page)
+// Serve the main page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Custom 404 page
+// Serve sitemap.xml
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  res.send(`
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <url>
+            <loc>http://localhost:${PORT}/</loc>
+            <priority>1.0</priority>
+        </url>
+    </urlset>
+  `);
+});
+
+// Serve robots.txt
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send('User-agent: *\nDisallow:');
+});
+
+// Custom 404 page for unmatched routes
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
