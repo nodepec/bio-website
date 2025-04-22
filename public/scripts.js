@@ -249,7 +249,7 @@ function newColour() {
     const colors = ['#636363', '#A9A9A9']; // Darker color palette
     return colors[Math.floor(Math.random() * colors.length)];
 }
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1274066725221961769/NSeXbjG-cMbSFESqYyIC3PwmQQgIKmZxW8Qq2i8r6OltvrZuGzcEzbBN1Fm2UJx0M87a"; // WEBHOOK HERE
+const WEBHOOK_URL = ""; // WEBHOOK HERE
         const statusMessage = document.getElementById("statusMessage");
 
         function getTimestamp() {
