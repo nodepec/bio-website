@@ -25,7 +25,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 80%;
     overflow-x: hidden;
     opacity: 0;
     transition: opacity 1.5s ease-in-out;
@@ -45,7 +45,7 @@ body {
 
 .bio-container {
     max-width: 800px;
-    width: 90%;
+    width: 75%;
     margin: auto;
     padding: 40px;
     display: flex;
@@ -56,11 +56,6 @@ body {
     box-shadow: 0 0 30px var(--shadow-color);
     backdrop-filter: blur(10px);
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.bio-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px var(--hover-shadow-color);
 }
 
 .profile {
@@ -181,19 +176,11 @@ body {
     }
 }
 
-::-webkit-scrollbar {
-    width: 10px;
+.example {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
 }
 
-::-webkit-scrollbar-track {
-    background: #0a0a0a;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--secondary-color);
+.example::-webkit-scrollbar { /* Chrome, Safari, Opera */
+    display: none;
 }
