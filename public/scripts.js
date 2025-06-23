@@ -18,10 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
         canvas.height = window.innerHeight;
     };
 
-    // Ensure the background animation starts independently
     createDynamicBackground();
 
-    // Page content animations
     window.addEventListener('load', () => {
         body.style.opacity = 1;
 
@@ -53,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
-// Disable right-click
 document.addEventListener('contextmenu', (e) => e.preventDefault());
 
 function ctrlShiftKey(e, keyCode) {
@@ -61,7 +58,6 @@ function ctrlShiftKey(e, keyCode) {
 }
 
 document.onkeydown = (e) => {
-  // Disable F12, Ctrl + Shift + I, Ctrl + Shift + J, Ctrl + U
 }
 
 function createDiv(height, width) {
@@ -74,7 +70,7 @@ function createDiv(height, width) {
 }
 
 function newColour() {
-    const colors = ['#636363', '#A9A9A9']; // Darker color palette
+    const colors = ['#636363', '#A9A9A9'];
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
