@@ -7,7 +7,6 @@
   <title>YxhaOmg — Links & Projects</title>
   <meta name="description" content="Personal bio with links, projects, and socials." />
 
-  <!-- Tailwind (Play CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -32,7 +31,6 @@
     }
   </script>
 
-  <!-- React 18 (UMD) + Babel for JSX -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -65,9 +63,6 @@
   <script type="text/babel">
     const {useEffect,useMemo,useRef,useState} = React;
 
-    /**
-     * Utilities & Hooks
-     */
     function useTheme(){
       const KEY='bio-theme';
       const [theme,setTheme]=useState(()=>localStorage.getItem(KEY)||'system');
@@ -106,7 +101,6 @@
       },[onTrigger]);
     }
 
-    /** Data */
     const Icon={
       YT:(p)=>(<svg viewBox="0 0 24 24" {...p}><path fill="currentColor" d="M23.5 6.2a4 4 0 0 0-2.8-2.8C18.9 3 12 3 12 3s-6.9 0-8.7.4A4 4 0 0 0 .5 6.2 41 41 0 0 0 0 12c0 1.9.1 3.8.5 5.8a4 4 0 0 0 2.8 2.8C5.1 21 12 21 12 21s6.9 0 8.7-.4a4 4 0 0 0 2.8-2.8c.3-2 .5-3.9.5-5.8s-.2-3.8-.5-5.8zM9.8 15.5V8.5L16 12l-6.2 3.5z"/></svg>),
       GH:(p)=>(<svg viewBox="0 0 24 24" {...p}><path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 .4 12.2a11.7 11.7 0 0 0 7.8 11c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.2-1.2-1.5-1.2-1.5-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.8 2.8 1.2 3.5.9a2.7 2.7 0 0 1 .8-1.7c-2.6-.3-5.3-1.3-5.3-5.9a4.7 4.7 0 0 1 1.3-3.2 4.3 4.3 0 0 1 .1-3.1s1-.3 3.2 1.2a11.2 11.2 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2a4.3 4.3 0 0 1 .1 3.1 4.7 4.7 0 0 1 1.3 3.2c0 4.6-2.8 5.6-5.4 5.9.4.3.9 1 .9 2v3c0 .3.2.6.8.5A11.7 11.7 0 0 0 23.6 12 11.5 11.5 0 0 0 12 .5z"/></svg>),
@@ -122,7 +116,6 @@
       {title:'Projects',href:'https://github.com/nodepec?tab=repositories',desc:"what I'm building",icon:'Ext'}
     ];
 
-    /** Components */
     function ThemeButton({theme,setTheme}){
       return (
         <button
@@ -249,7 +242,6 @@
       const time=useLocalTime('Australia/Perth');
       const online=useOnline();
 
-      // link clicks (simple local analytics)
       const [links,setLinks]=useState(()=>{
         const saved=JSON.parse(localStorage.getItem('linkClicks')||'{}');
         return LINKS_INIT.map(l=> ({...l, clicks: saved[l.href]||0}));
@@ -262,7 +254,6 @@
           return next; });
       };
 
-      // command palette (⌘K / Ctrl+K)
       const [open,setOpen]=useState(false);
       useEffect(()=>{
         const h=e=>{
@@ -281,9 +272,8 @@
         if(item.href){ window.open(item.href,'_blank','noopener'); addClick(item.href); setOpen(false); }
       };
 
-      // konami: boost the aura for fun
       useKonami(()=>{
-        const aura=document.querySelector('.aura::before'); // CSS pseudo isn't selectable; instead, toggle a class on root
+        const aura=document.querySelector('.aura::before');
         document.body.classList.toggle('party');
         const on=document.body.classList.contains('party');
         document.querySelectorAll('.aura').forEach(el=>{
@@ -378,4 +368,3 @@
   </script>
 </body>
 </html>
-
