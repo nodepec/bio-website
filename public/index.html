@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="web.ico"/>
+  <title>n33t — bio & links</title>
+  <meta name="description" content="Personal bio, links, and small UI experiments." />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            accent: {
+              DEFAULT: '#6366f1',
+            }
+          },
+          boxShadow: { soft: '0 8px 24px rgba(0,0,0,.08)' },
+          animation: { marquee: 'marquee 22s linear infinite' },
+          keyframes: { marquee: { from:{transform:'translateX(0)'}, to:{transform:'translateX(-50%)'} } }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="min-h-screen bg-white text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100">
+  <div aria-hidden class="grain pointer-events-none fixed inset-0 -z-10 opacity-[0.06] mix-blend-soft-light"></div>
+  <div id="root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
