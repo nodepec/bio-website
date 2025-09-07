@@ -60,29 +60,6 @@ function LinkTile({ title, desc, href, icon: key, clicks, onClick }){
   );
 }
 
-function SkillsTicker(){
-  const Pill = ({ label }) => (
-    <span className="mx-3 inline-flex items-center gap-2">
-      <span className="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
-      <span className="rounded-full bg-white/60 px-2 py-1 text-xs text-neutral-800 ring-1 ring-black/5 dark:bg-neutral-900/60 dark:text-neutral-100 dark:ring-white/10">{label}</span>
-    </span>
-  );
-  const items = ['React','TypeScript','Tailwind','Node.js','CSS'];
-  return (
-    <div className="relative mx-auto mt-8 w-full max-w-6xl overflow-hidden px-6">
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white dark:from-neutral-950"></div>
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white dark:from-neutral-950"></div>
-      <div className="animate-marquee whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-300">
-        {Array.from({ length: 2 }).map((_, i) => (
-          <span key={i} className="inline-block">
-            {items.map(x => <Pill key={i + x} label={x} />)}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function App(){
   const { theme, setTheme } = useTheme();
   const time = useClock('Australia/Perth');
@@ -100,35 +77,11 @@ function App(){
     });
   };
 
-  const doAction = (item) => {
-    if (item.action){ item.action(); setOpen(false); return; }
-    if (item.href){ window.open(item.href, '_blank', 'noopener'); addClick(item.href); setOpen(false); }
-  };
-
-  const [unlocked, setUnlocked] = useState(false);
-  const taps = useRef(0);
-  const tapTimer = useRef(null);
-  function onAvatarTap(){
-    taps.current += 1;
-    clearTimeout(tapTimer.current);
-    tapTimer.current = setTimeout(() => (taps.current = 0), 1400);
-    if (taps.current >= 5){
-      taps.current = 0;
-      setUnlocked(true);
-      const end = Date.now() + 900;
-      (function frame(){
-        confetti({ particleCount: 8, angle: 60, spread: 70, origin: { x: 0 } });
-        confetti({ particleCount: 8, angle: 120, spread: 70, origin: { x: 1 } });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-    }
-  }
-
   return (
     <div>
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 pt-8">
         <div className="flex items-center gap-4">
-          <img src="./avatar.png" alt="avatar" onClick={onAvatarTap} className="h-14 w-14 cursor-pointer rounded-full border border-white/20 object-cover shadow"/>
+          <img src="./avatar.png" alt="avatar" className="h-14 w-14 rounded-full border border-white/20 object-cover shadow"/>
           <div>
             <h1 className="text-2xl font-bold">n33t</h1>
           </div>
@@ -149,7 +102,6 @@ function App(){
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/60 px-3 py-1.5 text-sm text-neutral-700 shadow-sm backdrop-blur-sm dark:bg-neutral-800/60 dark:text-neutral-200">
                 AWST <span className="h-1.5 w-1.5 rounded-full bg-indigo-500"></span> {time}
               </span>
-              <span className="text-xs text-neutral-500">Tap the avatar for a surprise</span>
             </div>
           </div>
 
@@ -181,27 +133,6 @@ function App(){
             <p className="mt-2 text-neutral-700 dark:text-neutral-200">This is a small page that is kind of like a bio i guess</p>
           </div>
         </section>
-
-        {unlocked && (
-          <section className="mt-8">
-            <div className="rounded-xl border border-white/10 bg-white/60 p-6 shadow-soft ring-1 ring-black/5 backdrop-blur-sm dark:bg-neutral-900/60 dark:ring-white/10">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-700 dark:text-neutral-300">Easter egg found!</h3>
-              <p className="mt-2 text-neutral-700 dark:text-neutral-200">Hi</p>
-              <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-                <li className="rounded-lg bg-white/60 p-4 dark:bg-neutral-800/60">
-                  <div className="text-xs uppercase text-neutral-500 dark:text-neutral-400">Badge</div>
-                  <div className="text-lg font-bold">Egg Hunter</div>
-                </li>
-                <li className="rounded-lg bg-white/60 p-4 dark:bg-neutral-800/60">
-                  <div className="text-xs uppercase text-neutral-500 dark:text-neutral-400">Secret Link</div>
-                  <a className="font-semibold underline" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noreferrer">Supa Secret</a>
-                </li>
-              </ul>
-            </div>
-          </section>
-        )}
-
-        <SkillsTicker/>
       </main>
 
       <footer className="mx-auto my-12 max-w-6xl px-6 text-sm text-neutral-600 dark:text-neutral-300">
