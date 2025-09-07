@@ -38,17 +38,16 @@ function LinkTile({ title, desc, href, icon: key }) {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="group relative block rounded-xl border border-white/10 bg-neutral-900/60 p-4 shadow-soft backdrop-blur-sm transition-all hover:-translate-y-0.5"
-    >
+      className="group relative block rounded-xl border border-white/10 bg-neutral-900/60 p-4 shadow-soft backdrop-blur-sm transition-all hover:-translate-y-0.5">
       <div className="flex items-center gap-4">
         <span className="grid h-11 w-11 place-items-center rounded-lg text-white shadow bg-gradient-to-br from-indigo-500 to-violet-500">
-          <Svg className="h-5 w-5" />
+          <Svg className="h-5 w-5"/>
         </span>
         <div className="min-w-0">
           <h3 className="truncate text-base font-semibold">{title}</h3>
           <p className="mt-0.5 text-sm text-neutral-300">{desc}</p>
         </div>
-        <Icon.Ext className="ml-auto h-5 w-5 text-neutral-500 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
+        <Icon.Ext className="ml-auto h-5 w-5 text-neutral-500 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"/>
       </div>
     </a>
   );
@@ -62,13 +61,12 @@ function App() {
     <div>
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 pt-8">
         <div className="flex items-center gap-4">
-          <img src="./avatar.png" alt="avatar" className="h-14 w-14 rounded-full border border-white/20 object-cover shadow" />
+          <img src="./avatar.png" alt="avatar" className="h-14 w-14 rounded-full border border-white/20 object-cover shadow"/>
           <h1 className="text-2xl font-bold">n33t</h1>
         </div>
         <a
           href="https://github.com/nodepec/bio-website"
-          className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white shadow hover:opacity-95 bg-gradient-to-r from-indigo-500 to-violet-500"
-        >
+          className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white shadow hover:opacity-95 bg-gradient-to-r from-indigo-500 to-violet-500">
           <Icon.GH className="h-4 w-4" /> <span className="hidden sm:inline">Source</span>
         </a>
       </header>
@@ -98,8 +96,7 @@ function App() {
               ].map(([k, v]) => (
                 <li
                   key={k}
-                  className="rounded-lg bg-neutral-800/60 p-3 text-center shadow ring-1 ring-black/5"
-                >
+                  className="rounded-lg bg-neutral-800/60 p-3 text-center shadow ring-1 ring-black/5">
                   <div className="text-xs uppercase text-neutral-500">{k}</div>
                   <div className="mt-1 text-lg font-semibold">{v}</div>
                 </li>
@@ -110,7 +107,7 @@ function App() {
 
         <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {LINKS.map((l) => (
-            <LinkTile key={l.href} {...l} />
+            <LinkTile key={l.href} {...l}/>
           ))}
         </section>
 
