@@ -26,21 +26,6 @@ function useClock(tz = 'Australia/Perth'){
   }).format(now);
 }
 
-function useOnline(){
-  const [online, setOnline] = useState(navigator.onLine);
-  useEffect(() => {
-    const up = () => setOnline(true);
-    const down = () => setOnline(false);
-    window.addEventListener('online', up);
-    window.addEventListener('offline', down);
-    return () => {
-      window.removeEventListener('online', up);
-      window.removeEventListener('offline', down);
-    };
-  }, []);
-  return online;
-}
-
 const Icon = {
   YT:(p)=>(<svg viewBox="0 0 24 24" {...p}><path fill="currentColor" d="M23.5 6.2a4 4 0 0 0-2.8-2.8C18.9 3 12 3 12 3s-6.9 0-8.7.4A4 4 0 0 0 .5 6.2 41 41 0 0 0 0 12c0 1.9.1 3.8.5 5.8a4 4 0 0 0 2.8 2.8C5.1 21 12 21 12 21s6.9 0 8.7-.4a4 4 0 0 0 2.8-2.8c.3-2 .5-3.9.5-5.8s-.2-3.8-.5-5.8zM9.8 15.5V8.5L16 12l-6.2 3.5z"/></svg>),
   GH:(p)=>(<svg viewBox="0 0 24 24" {...p}><path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 .4 12.2a11.7 11.7 0 0 0 7.8 11c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.2-1.2-1.5-1.2-1.5-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.8 2.8 1.2 3.5.9a2.7 2.7 0 0 1 .8-1.7c-2.6-.3-5.3-1.3-5.3-5.9a4.7 4.7 0 0 1 1.3-3.2 4.3 4.3 0 0 1 .1-3.1s1-.3 3.2 1.2a11.2 11.2 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2a4.3 4.3 0 0 1 .1 3.1 4.7 4.7 0 0 1 1.3 3.2c0 4.6-2.8 5.6-5.4 5.9.4.3.9 1 .9 2v3c0 .3.2.6.8.5A11.7 11.7 0 0 0 23.6 12 11.5 11.5 0 0 0 12 .5z"/></svg>),
@@ -162,7 +147,6 @@ function CommandPalette({ open, onClose, items, onAction }){
 function App(){
   const { theme, setTheme } = useTheme();
   const time = useClock('Australia/Perth');
-  const online = useOnline();
 
   const [links, setLinks] = useState(() => {
     const saved = JSON.parse(localStorage.getItem('linkClicks') || '{}');
@@ -225,7 +209,6 @@ function App(){
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`hidden items-center gap-1 rounded-full px-2 py-1 text-xs ring-1 sm:inline-flex \${online? 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/30 dark:text-emerald-300' : 'bg-rose-500/10 text-rose-600 ring-rose-500/30 dark:text-rose-300'}`}>{online? 'Online' : 'Offline'}</span>
           <a href="https://github.com/nodepec/bio-website" className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white shadow hover:opacity-95 bg-gradient-to-r from-indigo-500 to-violet-500">
             {React.createElement(Icon.GH,{className:'h-4 w-4'})} <span className="hidden sm:inline">Source</span>
           </a>
