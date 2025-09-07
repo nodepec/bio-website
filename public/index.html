@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2338bdf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E" />
+  <link rel="icon" href="web.ico"/>
   <title>l33ting</title>
   <meta name="description" content="uhhh just a bio page i guess" />
 
@@ -120,26 +120,6 @@
           <span className="hidden sm:inline">{theme}</span>
         </button>
       )
-    }
-
-    function AccentPicker(){
-      const choices=[
-        ['Indigo / Sky', '#6366f1','#38bdf8'],
-        ['Emerald / Teal', '#10b981','#14b8a6'],
-        ['Rose / Purple', '#f43f5e','#a78bfa'],
-        ['Amber / Pink', '#f59e0b','#ec4899']
-      ];
-      const set=(a,b)=>{ document.documentElement.style.setProperty('--accent1',a); document.documentElement.style.setProperty('--accent2',b); };
-      return (
-        <div className="flex flex-wrap items-center gap-2">
-          {choices.map(([label,a,b])=> (
-            <button key={label} onClick={()=>set(a,b)} className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/60 px-2.5 py-1 shadow-sm backdrop-blur hover:bg-white/80 dark:bg-neutral-900/60 dark:hover:bg-neutral-900/80">
-              <span className="h-4 w-10 rounded-full" style={{background:`linear-gradient(90deg, ${a}, ${b})`}}></span>
-              <span className="text-xs text-neutral-700 dark:text-neutral-200">{label}</span>
-            </button>
-          ))}
-        </div>
-      );
     }
 
     function LinkCard({title,desc,href,icon:iconKey, clicks, onClick}){
@@ -317,7 +297,6 @@
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/70 px-3 py-1.5 text-sm text-neutral-700 shadow-sm backdrop-blur dark:bg-neutral-800/60 dark:text-neutral-200">
                     AWST <span className="h-1.5 w-1.5 rounded-full" style={{background:'var(--accent1)'}}></span> {time}
                   </span>
-                  <AccentPicker/>
                 </div>
                 <p className="mt-4 text-xs text-neutral-500">Psst… tap/click my avatar <strong>5×</strong> for a surprise. Press <kbd className="rounded bg-neutral-200 px-1 text-[10px] dark:bg-neutral-800">Ctrl/⌘+K</kbd> for the command palette.</p>
               </div>
@@ -394,10 +373,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
