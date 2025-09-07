@@ -282,13 +282,16 @@
       };
 
       useKonami(()=>{
-        const aura=document.querySelector('.aura::before');
-        document.body.classList.toggle('party');
-        const on=document.body.classList.contains('party');
-        document.querySelectorAll('.aura').forEach(el=>{
-          el.style.animationDuration = on? '8s':'24s';
-        });
-      });
+     // Confetti burst
+    confetti({
+              particleCount: 200,
+              spread: 70,
+              origin: { y: 0.6 }
+            });
+
+             // Popup message
+             alert("✨ You found the Konami Easter Egg! ✨");
+            });
 
       return (
         <div>
@@ -377,4 +380,5 @@
   </script>
 </body>
 </html>
+
 
