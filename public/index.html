@@ -122,26 +122,6 @@
       )
     }
 
-    function AccentPicker(){
-      const choices=[
-        ['Indigo / Sky', '#6366f1','#38bdf8'],
-        ['Emerald / Teal', '#10b981','#14b8a6'],
-        ['Rose / Purple', '#f43f5e','#a78bfa'],
-        ['Amber / Pink', '#f59e0b','#ec4899']
-      ];
-      const set=(a,b)=>{ document.documentElement.style.setProperty('--accent1',a); document.documentElement.style.setProperty('--accent2',b); };
-      return (
-        <div className="flex flex-wrap items-center gap-2">
-          {choices.map(([label,a,b])=> (
-            <button key={label} onClick={()=>set(a,b)} className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/60 px-2.5 py-1 shadow-sm backdrop-blur hover:bg-white/80 dark:bg-neutral-900/60 dark:hover:bg-neutral-900/80">
-              <span className="h-4 w-10 rounded-full" style={{background:`linear-gradient(90deg, ${a}, ${b})`}}></span>
-              <span className="text-xs text-neutral-700 dark:text-neutral-200">{label}</span>
-            </button>
-          ))}
-        </div>
-      );
-    }
-
     function LinkCard({title,desc,href,icon:iconKey, clicks, onClick}){
       const Svg = Icon[iconKey];
       return(
@@ -394,6 +374,7 @@
   </script>
 </body>
 </html>
+
 
 
 
