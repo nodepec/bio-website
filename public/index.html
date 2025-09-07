@@ -290,17 +290,22 @@
         if(item.href){ window.open(item.href,'_blank','noopener'); addClick(item.href); setOpen(false); }
       };
 
-      useKonami(()=>{
-     // Confetti burst
-    confetti({
-              particleCount: 200,
-              spread: 70,
-              origin: { y: 0.6 }
-            });
+     useKonami(() => {
+      const end = Date.now() + 800;
+      (function frame() {
+     confetti({ particleCount: 5, angle: 60, spread: 70, origin: { x: 0 } });
+     confetti({ particleCount: 5, angle: 120, spread: 70, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+     })();
 
-             // Popup message
-             alert("✨ You found the Konami Easter Egg! ✨");
-            });
+     const t = document.createElement('div');
+     t.textContent = '✨ Konami unlocked!';
+     t.className = 'fixed left-1/2 top-6 z-50 -translate-x-1/2 rounded-full px-4 py-2 text-sm text-white shadow';
+     t.style.background = 'linear-gradient(90deg, var(--accent1), var(--accent2))';
+     document.body.appendChild(t);
+      setTimeout(() => t.remove(), 1600);
+      });
+
 
       return (
         <div>
@@ -389,6 +394,7 @@
   </script>
 </body>
 </html>
+
 
 
 
