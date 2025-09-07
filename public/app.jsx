@@ -30,7 +30,6 @@ const Icon = {
   YT:(p)=>(<svg viewBox="0 0 24 24" {...p}><path fill="currentColor" d="M23.5 6.2a4 4 0 0 0-2.8-2.8C18.9 3 12 3 12 3s-6.9 0-8.7.4A4 4 0 0 0 .5 6.2 41 41 0 0 0 0 12c0 1.9.1 3.8.5 5.8a4 4 0 0 0 2.8 2.8C5.1 21 12 21 12 21s6.9 0 8.7-.4a4 4 0 0 0 2.8-2.8c.3-2 .5-3.9.5-5.8s-.2-3.8-.5-5.8zM9.8 15.5V8.5L16 12l-6.2 3.5z"/></svg>),
   GH:(p)=>(<svg viewBox="0 0 24 24" {...p}><path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 .4 12.2a11.7 11.7 0 0 0 7.8 11c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.2-1.2-1.5-1.2-1.5-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.8 2.8 1.2 3.5.9a2.7 2.7 0 0 1 .8-1.7c-2.6-.3-5.3-1.3-5.3-5.9a4.7 4.7 0 0 1 1.3-3.2 4.3 4.3 0 0 1 .1-3.1s1-.3 3.2 1.2a11.2 11.2 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2a4.3 4.3 0 0 1 .1 3.1 4.7 4.7 0 0 1 1.3 3.2c0 4.6-2.8 5.6-5.4 5.9.4.3.9 1 .9 2v3c0 .3.2.6.8.5A11.7 11.7 0 0 0 23.6 12 11.5 11.5 0 0 0 12 .5z"/></svg>),
   Ext:(p)=>(<svg viewBox="0 0 24 24" {...p}><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z"/></svg>),
-  Search:(p)=>(<svg viewBox="0 0 24 24" {...p}><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79L20 21.5 21.5 20l-5.99-6zM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>),
 };
 
 const LINKS = [
@@ -38,17 +37,6 @@ const LINKS = [
   { title:'GitHub',  href:'https://github.com/nodepec',           desc:'Projects',   icon:'GH' },
   { title:'Repos',   href:'https://github.com/nodepec?tab=repositories', desc:'All repos', icon:'Ext' }
 ];
-
-function ThemeSwitch({ theme, setTheme }){
-  const next = () => setTheme(t => (t === 'dark' ? 'light' : t === 'light' ? 'system' : 'dark'));
-  return (
-    <button onClick={next}
-      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/60 px-3 py-1.5 text-sm font-medium text-neutral-900 shadow-sm backdrop-blur-sm hover:bg-white/80 dark:bg-neutral-900/60 dark:text-neutral-100 dark:hover:bg-neutral-900/80">
-      <span className="h-4 w-4 rounded-full ring-2 ring-white/60 bg-gradient-to-br from-indigo-500 to-violet-500"></span>
-      <span className="hidden sm:inline">{theme}</span>
-    </button>
-  );
-}
 
 function LinkTile({ title, desc, href, icon: key, clicks, onClick }){
   const Svg = Icon[key];
@@ -95,55 +83,6 @@ function SkillsTicker(){
   );
 }
 
-function CommandPalette({ open, onClose, items, onAction }){
-  const [q, setQ] = useState('');
-  const inputRef = useRef(null);
-
-  useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 0); }, [open]);
-  useEffect(() => {
-    const onEsc = e => { if (e.key === 'Escape') onClose(); };
-    if (open) window.addEventListener('keydown', onEsc);
-    return () => window.removeEventListener('keydown', onEsc);
-  }, [open, onClose]);
-
-  const results = useMemo(() =>
-    items.filter(i => (i.title + ' ' + (i.desc || '')).toLowerCase().includes(q.toLowerCase()))
-  , [q, items]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-start bg-black/40 p-4 pt-24" onClick={onClose}>
-      <div className="mx-auto w-full max-w-xl overflow-hidden rounded-xl border border-white/10 bg-white/80 shadow-2xl backdrop-blur-sm dark:bg-neutral-900/80" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-          <Icon.Search className="h-5 w-5 text-neutral-500"/>
-          <input ref={inputRef} value={q} onChange={e => setQ(e.target.value)} placeholder="Search links & actions..." className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-500"/>
-          <kbd className="rounded bg-white/60 px-1.5 py-0.5 text-[10px] text-neutral-700 ring-1 ring-black/5 dark:bg-neutral-800/70 dark:text-neutral-200 dark:ring-white/10">Esc</kbd>
-        </div>
-        <ul className="max-h-80 overflow-y-auto p-2">
-          {results.length === 0 && (
-            <li className="px-3 py-6 text-center text-sm text-neutral-500">No results</li>
-          )}
-          {results.map((r, idx) => (
-            <li key={idx}>
-              <button onClick={() => onAction(r)} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-white/60 dark:hover:bg-neutral-800/60">
-                <span className="grid h-8 w-8 place-items-center rounded-md text-white bg-gradient-to-br from-indigo-500 to-violet-500">
-                  {Icon[r.icon] ? React.createElement(Icon[r.icon]) : <span className="text-xs">{r.title[0]}</span>}
-                </span>
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold">{r.title}</div>
-                  {r.desc && <div className="truncate text-xs text-neutral-500">{r.desc}</div>}
-                </div>
-                <span className="ml-auto text-xs text-neutral-500">↗</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
 function App(){
   const { theme, setTheme } = useTheme();
   const time = useClock('Australia/Perth');
@@ -161,20 +100,6 @@ function App(){
     });
   };
 
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const onKey = e => {
-      const isK = e.key && e.key.toLowerCase() === 'k';
-      if ((e.ctrlKey || e.metaKey) && isK) { e.preventDefault(); setOpen(v => !v); }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
-  const paletteItems = [
-    ...links,
-    { title:'Toggle theme', desc:'Cycle dark / light / system', icon:'Ext', action:() => setTheme(t => t === 'dark' ? 'light' : t === 'light' ? 'system' : 'dark') }
-  ];
   const doAction = (item) => {
     if (item.action){ item.action(); setOpen(false); return; }
     if (item.href){ window.open(item.href, '_blank', 'noopener'); addClick(item.href); setOpen(false); }
@@ -212,11 +137,6 @@ function App(){
           <a href="https://github.com/nodepec/bio-website" className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-white shadow hover:opacity-95 bg-gradient-to-r from-indigo-500 to-violet-500">
             {React.createElement(Icon.GH,{className:'h-4 w-4'})} <span className="hidden sm:inline">Source</span>
           </a>
-          <button onClick={() => setOpen(true)} className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/60 px-3 py-1.5 text-sm text-neutral-700 backdrop-blur-sm hover:bg-white/80 dark:bg-neutral-900/60 dark:text-neutral-200 md:inline-flex">
-            <svg className="h-4 w-4" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79L20 21.5 21.5 20l-5.99-6zM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
-            <span className="hidden sm:inline">Search</span>
-            <span className="ml-1 hidden items-center gap-1 text-[10px] text-neutral-500 ring-1 ring-black/5 sm:inline-flex dark:ring-white/10"><kbd className="rounded bg-white/60 px-1 dark:bg-neutral-800/70">⌘</kbd>+<kbd className="rounded bg-white/60 px-1 dark:bg-neutral-800/70">K</kbd></span>
-          </button>
         </div>
       </header>
 
@@ -288,7 +208,6 @@ function App(){
         <p>© {new Date().getFullYear()} n33t</p>
       </footer>
 
-      <CommandPalette open={open} onClose={() => setOpen(false)} items={paletteItems} onAction={doAction} />
     </div>
   );
 }
