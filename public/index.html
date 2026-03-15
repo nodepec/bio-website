@@ -42,7 +42,6 @@
       position: relative;
     }
 
-    /* particles canvas */
     .particles-canvas {
       position: absolute;
       inset: 0;
@@ -53,7 +52,6 @@
       image-rendering: pixelated;
     }
 
-    /* terminal shell */
     .terminal-shell {
       position: relative;
       z-index: 1;
@@ -65,7 +63,6 @@
       overflow: hidden;
     }
 
-    /* titlebar */
     .titlebar {
       height: 48px;
       display: grid;
@@ -90,7 +87,6 @@
       letter-spacing: .04em;
     }
 
-    /* body area */
     .terminal-body {
       position: relative;
       height: min(600px, 76vh);
@@ -98,7 +94,6 @@
       outline: none;
     }
 
-    /* scanlines */
     .terminal-body::after {
       content: "";
       position: absolute;
@@ -113,23 +108,23 @@
       mix-blend-mode: overlay;
     }
 
-    /* screen panels */
     .screen {
       position: absolute;
       inset: 0;
       padding: 24px;
       display: flex;
       flex-direction: column;
-      transition: opacity .25s ease, transform .25s ease;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity .22s ease, transform .22s ease;
     }
 
-    .screen.hidden {
+    .screen-off {
       opacity: 0;
       pointer-events: none;
-      transform: translateY(6px);
+      transform: translateY(8px);
     }
 
-    /* boot */
     .boot-inner {
       flex: 1;
       display: flex;
@@ -175,7 +170,6 @@
       gap: 6px;
     }
 
-    /* bio */
     .bio-inner {
       flex: 1;
       display: grid;
@@ -191,10 +185,10 @@
       text-overflow: ellipsis;
     }
 
-    .p-host  { color: var(--accent); opacity: .85; }
-    .p-dim   { color: var(--dim); }
-    .p-path  { color: rgba(226,226,226,.65); }
-    .p-cmd   { color: var(--text); }
+    .p-host { color: var(--accent); opacity: .85; }
+    .p-dim  { color: var(--dim); }
+    .p-path { color: rgba(226,226,226,.65); }
+    .p-cmd  { color: var(--text); }
 
     .tabs-row {
       display: flex;
@@ -216,6 +210,7 @@
     }
 
     .tab-btn:hover { color: var(--text); border-color: var(--border-hi); }
+
     .tab-btn.active {
       color: var(--accent);
       border-color: rgba(79,255,176,.35);
@@ -298,7 +293,6 @@
       align-items: center;
     }
 
-    /* key chip */
     .key {
       display: inline-flex;
       align-items: center;
@@ -310,11 +304,10 @@
       font-size: 11px;
       color: var(--text);
       font-family: var(--mono);
+      cursor: default;
     }
 
     .dud { opacity: .45; color: var(--accent); }
-
-    .hidden-screen { display: none !important; }
 
     @media (max-width: 520px) {
       .screen { padding: 16px; }
@@ -329,358 +322,192 @@
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 
-const HACKER_CAT = `     welcome!
-    /\\_/\\           ___
-   = o_o =_______    \\ \\ 
-    __^      __(  \\.__) )
-(@)<_____>__(_____)____/`;
+const HACKER_CAT = '     welcome!\n    /\\_/\\           ___\n   = o_o =_______    \\ \\ \n    __^      __(  \\.__) )\n(@)<_____>__(_____)____/';
 
-const TABS = ['profile','about','skills','projects','writeups','links'];
+const TABS = ['profile', 'about', 'skills', 'projects', 'writeups', 'links'];
 
 const CONTENT = {
-  profile: `Name:       [REDACTED]
-Handle:     @nodepec
-Focus:      CTF / web / cyber security
-Location:   Perth, AU
-Status:     learning + building
-
-Notes:
-- I participate in ctf events every now and then
-- I keep solutions to the main challenges
-- I dont like boring stuff 🥀`,
-
-  about: `I like difficult challenges that make me think
-small hypotheses → quick tests → record → refine
-
-I'm most interested in:
-- web apps
-- cryptography
-- open source intelligence`,
-
-  skills: `Coding:
-- JavaScript, Python, Html, Css
-
-CTF / security:
-- web fundamentals, auth flows, input handling mindset
-- writeups: assumptions → tests → evidence → lesson
-
-Tools:
-- Burp (learning), Wireshark (also learning), Ghidra (ultra noob)`,
-
-  projects: `https://nodepec.github.io/The-Challenges/
-
-This is my self made ctf challenges that use ai to adapt my
-encryption methods into an interactive story that makes you
-feel like it is something meaningful`,
-
-  writeups: `[placeholder] lorem ipsum dolor sit amet
-[placeholder] lorem ipsum dolor sit amet
-[placeholder] lorem ipsum dolor sit amet`,
+  profile:  'Name:       [REDACTED]\nHandle:     @nodepec\nFocus:      CTF / web / cyber security\nLocation:   Perth, AU\nStatus:     learning + building\n\nNotes:\n- I participate in ctf events every now and then\n- I keep solutions to the main challenges\n- I dont like boring stuff',
+  about:    'I like difficult challenges that make me think\nsmall hypotheses -> quick tests -> record -> refine\n\nI\'m most interested in:\n- web apps\n- cryptography\n- open source intelligence',
+  skills:   'Coding:\n- JavaScript, Python, Html, Css\n\nCTF / security:\n- web fundamentals, auth flows, input handling mindset\n- writeups: assumptions -> tests -> evidence -> lesson\n\nTools:\n- Burp (learning), Wireshark (also learning), Ghidra (ultra noob)',
+  projects: 'https://nodepec.github.io/The-Challenges/\n\nThis is my self made ctf challenges that use ai to adapt my\nencryption methods into an interactive story that makes you\nfeel like it is something meaningful',
+  writeups: '[placeholder] lorem ipsum dolor sit amet\n[placeholder] lorem ipsum dolor sit amet\n[placeholder] lorem ipsum dolor sit amet',
 };
 
 const LINKS = [
-  { href: 'https://github.com/nodepec',        label: 'github://nodepec' },
-  { href: 'https://ctftime.org/team/402033',   label: 'ctftime://team'   },
+  { href: 'https://github.com/nodepec',      label: 'github://nodepec' },
+  { href: 'https://ctftime.org/team/402033', label: 'ctftime://team'   },
 ];
 
-// ── TextScramble ──────────────────────────────────────────────────────────────
-const SCRAMBLE_CHARS = '!<>-_\\/[]{}—=+*^?#________';
+const CMD_MAP  = { profile: 'cat profile.txt', about: 'cat about.md', skills: 'cat skills.txt', projects: 'cat projects.json', writeups: 'tail -n 3 latest.log', links: 'cat links.txt' };
+const PATH_MAP = { profile: '~/bio', about: '~/bio/about', skills: '~/bio/skills', projects: '~/bio/projects', writeups: '~/bio/writeups', links: '~/bio/links' };
 
-function useScramble() {
-  const scramble = useCallback((el, finalText) => {
-    if (!el || el._scrambling) return;
-    const oldText = el.innerText || '';
-    const length  = Math.max(oldText.length, finalText.length);
-    const queue   = [];
-    for (let i = 0; i < length; i++) {
-      queue.push({
-        from:  oldText[i] || '',
-        to:    finalText[i] || '',
-        start: Math.floor(Math.random() * 40),
-        end:   Math.floor(Math.random() * 40) + Math.floor(Math.random() * 40),
-        char:  '',
-      });
+const SC = '!<>-_\\/[]{}=+*^?#________';
+
+function runScramble(el, finalText) {
+  if (!el || el._scrambling) return;
+  const old = el.innerText || '';
+  const len = Math.max(old.length, finalText.length);
+  const q   = [];
+  for (let i = 0; i < len; i++) {
+    const s = Math.floor(Math.random() * 40);
+    q.push({ from: old[i] || '', to: finalText[i] || '', start: s, end: s + Math.floor(Math.random() * 40), char: '' });
+  }
+  el._scrambling = true;
+  let f = 0;
+  const run = () => {
+    let out = '', done = 0;
+    for (let i = 0; i < q.length; i++) {
+      const e = q[i];
+      if (f >= e.end)        { done++; out += e.to; }
+      else if (f >= e.start) { if (!e.char || Math.random() < 0.28) e.char = SC[Math.floor(Math.random() * SC.length)]; out += '<span class="dud">' + e.char + '</span>'; }
+      else                   { out += e.from; }
     }
-    el._scrambling = true;
-    let frame = 0;
-    let raf;
-    const update = () => {
-      let out = '', complete = 0;
-      for (let i = 0; i < queue.length; i++) {
-        const q = queue[i];
-        if (frame >= q.end) {
-          complete++;
-          out += q.to;
-        } else if (frame >= q.start) {
-          if (!q.char || Math.random() < 0.28) {
-            q.char = SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
-          }
-          out += `<span class="dud">${q.char}</span>`;
-        } else {
-          out += q.from;
-        }
-      }
-      el.innerHTML = out;
-      if (complete === queue.length) {
-        el._scrambling = false;
-      } else {
-        frame++;
-        raf = requestAnimationFrame(update);
-      }
-    };
-    cancelAnimationFrame(raf);
-    update();
-  }, []);
-  return scramble;
+    el.innerHTML = out;
+    if (done === q.length) { el._scrambling = false; el.innerHTML = finalText; }
+    else { f++; requestAnimationFrame(run); }
+  };
+  run();
 }
 
-// ── Particles ─────────────────────────────────────────────────────────────────
 function Particles({ terminalRef }) {
-  const canvasRef = useRef(null);
-
+  const cvs = useRef(null);
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = cvs.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const CFG = {
-      count: 110, size: 2, speed: 0.35, lifetime: 220,
-      repelRadius: 90, repelForce: 0.18,
-      burstCount: 18, burstSpeed: 3.2,
-      color: '#ffffff', opacity: 0.5,
-    };
-    const r2  = CFG.repelRadius * CFG.repelRadius;
-    const PAD = 14;
-    let termRect = { left:0, top:0, right:0, bottom:0 };
-    let W = 0, H = 0;
-
-    function resize() {
-      W = canvas.offsetWidth;
-      H = canvas.offsetHeight;
-      canvas.width  = W;
-      canvas.height = H;
+    const C = { count:110, size:2, speed:.35, lifetime:220, rr:90, rf:.18, bc:18, bs:3.2, col:'#fff', op:.5 };
+    const r2 = C.rr * C.rr, PAD = 14;
+    let tr = {l:0,t:0,r:0,b:0}, W=0, H=0;
+    const inT = (x,y) => x>=tr.l && x<=tr.r && y>=tr.t && y<=tr.b;
+    function rsz() {
+      W=canvas.offsetWidth; H=canvas.offsetHeight; canvas.width=W; canvas.height=H;
       if (terminalRef.current) {
-        const cr = canvas.getBoundingClientRect();
-        const tr = terminalRef.current.getBoundingClientRect();
-        termRect = {
-          left:   tr.left   - cr.left - PAD,
-          top:    tr.top    - cr.top  - PAD,
-          right:  tr.right  - cr.left + PAD,
-          bottom: tr.bottom - cr.top  + PAD,
-        };
+        const cr=canvas.getBoundingClientRect(), t=terminalRef.current.getBoundingClientRect();
+        tr={l:t.left-cr.left-PAD, t:t.top-cr.top-PAD, r:t.right-cr.left+PAD, b:t.bottom-cr.top+PAD};
       }
     }
-
-    const inT = (x, y) =>
-      x >= termRect.left && x <= termRect.right &&
-      y >= termRect.top  && y <= termRect.bottom;
-
-    function mkParticle(burst=false, bx=0, by=0) {
-      const a   = Math.random() * Math.PI * 2;
-      const spd = burst
-        ? CFG.burstSpeed * (0.5 + Math.random())
-        : CFG.speed * (0.4 + Math.random() * 0.8);
-      let x, y;
-      if (burst) { x = bx; y = by; }
-      else { do { x = Math.random()*W; y = Math.random()*H; } while (inT(x,y)); }
-      return {
-        x, y,
-        vx: Math.cos(a)*spd, vy: Math.sin(a)*spd,
-        phase: Math.random()*Math.PI*2,
-        life: burst ? 0 : Math.floor(Math.random()*CFG.lifetime),
-        maxLife: CFG.lifetime + Math.floor(Math.random()*80-40),
-        burst,
-      };
+    function mp(burst,bx,by) {
+      burst=!!burst; bx=bx||0; by=by||0;
+      const a=Math.random()*Math.PI*2, spd=burst?C.bs*(0.5+Math.random()):C.speed*(0.4+Math.random()*0.8);
+      let x,y;
+      if(burst){x=bx;y=by;}else{do{x=Math.random()*W;y=Math.random()*H;}while(inT(x,y));}
+      return {x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,phase:Math.random()*Math.PI*2,life:burst?0:Math.floor(Math.random()*C.lifetime),maxLife:C.lifetime+Math.floor(Math.random()*80-40),burst};
     }
-
-    const particles = Array.from({length: CFG.count}, () => mkParticle());
-    const mouse = {x: -9999, y: -9999};
-    let fc = 0, rafId;
-
-    const onMove = e => {
-      const cr = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - cr.left;
-      mouse.y = e.clientY - cr.top;
-    };
-    const onLeave = () => { mouse.x = -9999; mouse.y = -9999; };
-    const onClick = e => {
-      const cr = canvas.getBoundingClientRect();
-      const x = e.clientX - cr.left, y = e.clientY - cr.top;
-      if (inT(x, y)) return;
-      for (let i = 0; i < CFG.burstCount; i++) particles.push(mkParticle(true, x, y));
-    };
-
-    window.addEventListener('mousemove', onMove, {passive:true});
-    window.addEventListener('mouseleave', onLeave, {passive:true});
-    window.addEventListener('click', onClick);
-    window.addEventListener('resize', resize, {passive:true});
-    resize();
-
-    const tick = () => {
-      rafId = requestAnimationFrame(tick);
-      fc++;
-      ctx.clearRect(0, 0, W, H);
-      for (let i = particles.length-1; i >= 0; i--) {
-        const p = particles[i];
-        p.life++;
-        let alpha;
-        if (p.life < 20)               alpha = (p.life/20)*CFG.opacity;
-        else if (p.life > p.maxLife-40) alpha = ((p.maxLife-p.life)/40)*CFG.opacity;
-        else                            alpha = CFG.opacity;
-        if (p.life >= p.maxLife) {
-          if (p.burst) { particles.splice(i,1); continue; }
-          Object.assign(p, mkParticle());
-          continue;
-        }
-        const dx=p.x-mouse.x, dy=p.y-mouse.y, d2=dx*dx+dy*dy;
-        if (d2 < r2 && d2 > 0) {
-          const d = Math.sqrt(d2), f = CFG.repelForce*(1-d/CFG.repelRadius);
-          p.vx += (dx/d)*f; p.vy += (dy/d)*f;
-        }
-        p.vx *= 0.97; p.vy *= 0.97;
-        if (!p.burst) {
-          p.vx += Math.sin(p.phase+fc*0.012)*0.008;
-          p.vy += Math.cos(p.phase+fc*0.009)*0.008;
-        }
-        p.x += p.vx; p.y += p.vy;
+    const ps=Array.from({length:C.count},()=>mp());
+    const mouse={x:-9999,y:-9999};
+    let fc=0, rid;
+    const mv=e=>{const cr=canvas.getBoundingClientRect();mouse.x=e.clientX-cr.left;mouse.y=e.clientY-cr.top;};
+    const ml=()=>{mouse.x=-9999;mouse.y=-9999;};
+    const cl=e=>{const cr=canvas.getBoundingClientRect(),x=e.clientX-cr.left,y=e.clientY-cr.top;if(inT(x,y))return;for(let i=0;i<C.bc;i++)ps.push(mp(true,x,y));};
+    window.addEventListener('mousemove',mv,{passive:true});
+    window.addEventListener('mouseleave',ml,{passive:true});
+    window.addEventListener('click',cl);
+    window.addEventListener('resize',rsz,{passive:true});
+    rsz();
+    const tick=()=>{
+      rid=requestAnimationFrame(tick); fc++;
+      ctx.clearRect(0,0,W,H);
+      for(let i=ps.length-1;i>=0;i--){
+        const p=ps[i]; p.life++;
+        let a;
+        if(p.life<20) a=(p.life/20)*C.op;
+        else if(p.life>p.maxLife-40) a=((p.maxLife-p.life)/40)*C.op;
+        else a=C.op;
+        if(p.life>=p.maxLife){if(p.burst){ps.splice(i,1);continue;}Object.assign(p,mp());continue;}
+        const dx=p.x-mouse.x,dy=p.y-mouse.y,d2=dx*dx+dy*dy;
+        if(d2<r2&&d2>0){const d=Math.sqrt(d2),f=C.rf*(1-d/C.rr);p.vx+=(dx/d)*f;p.vy+=(dy/d)*f;}
+        p.vx*=0.97;p.vy*=0.97;
+        if(!p.burst){p.vx+=Math.sin(p.phase+fc*0.012)*0.008;p.vy+=Math.cos(p.phase+fc*0.009)*0.008;}
+        p.x+=p.vx;p.y+=p.vy;
         const buf=4;
-        if (p.x<-buf) p.x=W+buf; if (p.x>W+buf) p.x=-buf;
-        if (p.y<-buf) p.y=H+buf; if (p.y>H+buf) p.y=-buf;
-        if (inT(p.x, p.y)) continue;
-        ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
-        ctx.fillStyle   = CFG.color;
-        ctx.fillRect(Math.round(p.x), Math.round(p.y), CFG.size, CFG.size);
+        if(p.x<-buf)p.x=W+buf;if(p.x>W+buf)p.x=-buf;
+        if(p.y<-buf)p.y=H+buf;if(p.y>H+buf)p.y=-buf;
+        if(inT(p.x,p.y))continue;
+        ctx.globalAlpha=Math.max(0,Math.min(1,a));ctx.fillStyle=C.col;ctx.fillRect(Math.round(p.x),Math.round(p.y),C.size,C.size);
       }
-      while (particles.filter(p=>!p.burst).length < CFG.count) particles.push(mkParticle());
-      ctx.globalAlpha = 1;
+      while(ps.filter(p=>!p.burst).length<C.count)ps.push(mp());
+      ctx.globalAlpha=1;
     };
     tick();
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseleave', onLeave);
-      window.removeEventListener('click', onClick);
-      window.removeEventListener('resize', resize);
-    };
-  }, [terminalRef]);
-
-  return <canvas ref={canvasRef} className="particles-canvas" />;
+    return ()=>{cancelAnimationFrame(rid);window.removeEventListener('mousemove',mv);window.removeEventListener('mouseleave',ml);window.removeEventListener('click',cl);window.removeEventListener('resize',rsz);};
+  }, []);
+  return <canvas ref={cvs} className="particles-canvas" />;
 }
 
-// ── ScrambleText ──────────────────────────────────────────────────────────────
-function ScrambleText({ text, className, onHover }) {
+function Key({ children }) {
   const ref = useRef(null);
-  const scramble = useScramble();
-  const trigger = useCallback(() => scramble(ref.current, text), [scramble, text]);
-  useEffect(() => { if (onHover && ref.current) {} }, []);
-  return (
-    <span
-      ref={ref}
-      className={className}
-      onMouseEnter={onHover ? trigger : undefined}
-    >{text}</span>
-  );
+  return <kbd className="key" ref={ref} onMouseEnter={() => runScramble(ref.current, String(children))}>{children}</kbd>;
 }
 
-// ── BootInfo ──────────────────────────────────────────────────────────────────
-function BootInfo({ label, id, value }) {
-  const ref  = useRef(null);
-  const prev = useRef('');
-  const scramble = useScramble();
-
+function PromptLine({ path, cmd, trigger }) {
+  const hr = useRef(null), cr = useRef(null);
   useEffect(() => {
-    if (!ref.current) return;
-    if (value && value !== prev.current && value !== 'resolving…' && value !== 'loading…') {
-      prev.current = value;
-      ref.current.textContent = value;
-      scramble(ref.current, value);
-    } else if (ref.current.textContent !== value) {
-      ref.current.textContent = value;
-    }
-  }, [value, scramble]);
-
-  return (
-    <>
-      <span className="boot-label">{label}</span>
-      <span className="boot-value" ref={ref}>{value}</span>
-    </>
-  );
-}
-
-// ── PromptLine ────────────────────────────────────────────────────────────────
-function PromptLine({ path, cmd }) {
-  const hostRef = useRef(null);
-  const cmdRef  = useRef(null);
-  const scramble = useScramble();
-  useEffect(() => {
-    if (hostRef.current) scramble(hostRef.current, 'user@host');
-    if (cmdRef.current)  scramble(cmdRef.current, cmd);
-  }, [cmd]);
+    if (hr.current) runScramble(hr.current, 'user@host');
+    if (cr.current) runScramble(cr.current, cmd);
+  }, [trigger, cmd]);
   return (
     <div className="prompt-line">
-      <span className="p-host" ref={hostRef}>user@host</span>
+      <span className="p-host" ref={hr}>user@host</span>
       <span className="p-dim">:</span>
       <span className="p-path">{path}</span>
       <span className="p-dim">$ </span>
-      <span className="p-cmd" ref={cmdRef}>{cmd}</span>
+      <span className="p-cmd" ref={cr}>{cmd}</span>
     </div>
   );
 }
 
-// ── Key chip ──────────────────────────────────────────────────────────────────
-function Key({ children }) {
-  const ref = useRef(null);
-  const scramble = useScramble();
+function BootValue({ label, id, value }) {
+  const ref  = useRef(null);
+  const prev = useRef('');
+  useEffect(() => {
+    if (!ref.current) return;
+    if (value && value !== prev.current && value !== 'resolving...' && value !== 'loading...') {
+      prev.current = value;
+      runScramble(ref.current, value);
+    } else {
+      ref.current.textContent = value;
+    }
+  }, [value]);
   return (
-    <kbd className="key" ref={ref} onMouseEnter={() => scramble(ref.current, String(children))}>
-      {children}
-    </kbd>
+    <React.Fragment>
+      <span className="boot-label">{label}</span>
+      <span className="boot-value" id={id} ref={ref}>{value}</span>
+    </React.Fragment>
   );
 }
 
-// ── Boot screen ───────────────────────────────────────────────────────────────
 function BootScreen({ visible, onEnter, ip, system, uptime }) {
-  const enterRef = useRef(null);
-  const scramble = useScramble();
+  const eref = useRef(null);
+  useEffect(() => {
+    if (!visible) return;
+    const h = e => { if (e.key !== 'Enter') return; if (eref.current) runScramble(eref.current, 'Enter'); setTimeout(onEnter, 100); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [visible, onEnter]);
 
   useEffect(() => {
     if (!visible) return;
-    const handler = e => {
-      if (e.key === 'Enter') {
-        if (enterRef.current) scramble(enterRef.current, 'Enter');
-        setTimeout(onEnter, 120);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [visible, onEnter, scramble]);
-
-  useEffect(() => {
-    if (!visible) return;
-    const ids = ['ip', 'system', 'uptime'];
-    const interval = setInterval(() => {
-      // periodic scramble handled by BootInfo via value changes
-    }, 6000);
-    return () => clearInterval(interval);
+    const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+    let tid;
+    const sched = () => { tid = setTimeout(() => { const ids=['bv-ip','bv-sys','bv-up'], el=document.getElementById(ids[rand(0,2)]); if(el&&!el._scrambling&&el.textContent)runScramble(el,el.textContent); sched(); }, rand(5000,7000)); };
+    sched();
+    return () => clearTimeout(tid);
   }, [visible]);
 
   return (
-    <div className={`screen${visible ? '' : ' hidden'}`}>
+    <div className={'screen' + (visible ? '' : ' screen-off')}>
       <div className="boot-inner">
         <pre className="ascii-art">{HACKER_CAT}</pre>
         <div className="boot-info">
-          <BootInfo label="IP:"     value={ip}     />
-          <BootInfo label="System:" value={system} />
-          <BootInfo label="Uptime:" value={uptime} />
+          <BootValue label="IP:"     id="bv-ip"  value={ip}     />
+          <BootValue label="System:" id="bv-sys" value={system} />
+          <BootValue label="Uptime:" id="bv-up"  value={uptime} />
         </div>
         <div className="boot-loaded">// Bio Loaded</div>
         <div className="hint">
           <span>Press</span>
-          <kbd
-            className="key"
-            ref={enterRef}
-            onMouseEnter={() => scramble(enterRef.current, 'Enter')}
-          >Enter</kbd>
+          <kbd className="key" ref={eref} onMouseEnter={() => runScramble(eref.current, 'Enter')}>Enter</kbd>
           <span>to continue</span>
         </div>
       </div>
@@ -688,73 +515,57 @@ function BootScreen({ visible, onEnter, ip, system, uptime }) {
   );
 }
 
-// ── Bio screen ────────────────────────────────────────────────────────────────
-function BioScreen({ visible, onEscape, activeTab, setActiveTab }) {
-  const scramble = useScramble();
+function BioScreen({ visible, onEscape, activeTab, setActiveTab, trigger }) {
+  useEffect(() => {
+    if (!visible) return;
+    const h = e => {
+      if      (e.key === 'Escape')     onEscape();
+      else if (e.key === 'ArrowRight') setActiveTab(t => TABS[(TABS.indexOf(t)+1)%TABS.length]);
+      else if (e.key === 'ArrowLeft')  setActiveTab(t => TABS[(TABS.indexOf(t)-1+TABS.length)%TABS.length]);
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [visible, onEscape, setActiveTab]);
 
   useEffect(() => {
     if (!visible) return;
-    const handler = e => {
-      if (e.key === 'Escape') onEscape();
-      else if (e.key === 'ArrowRight') setActiveTab(t => TABS[(TABS.indexOf(t)+1) % TABS.length]);
-      else if (e.key === 'ArrowLeft')  setActiveTab(t => TABS[(TABS.indexOf(t)-1+TABS.length) % TABS.length]);
+    const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+    let tid;
+    const sched = () => {
+      tid = setTimeout(() => {
+        const pool = Array.from(document.querySelectorAll('.page.active .p-host, .page.active .p-cmd, .page.active .p-path, .title-text')).filter(el => !el._scrambling && el.innerText && el.innerText.trim());
+        if (pool.length) runScramble(pool[rand(0,pool.length-1)], pool[rand(0,pool.length-1)].innerText);
+        sched();
+      }, rand(5000,7000));
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [visible, onEscape, setActiveTab]);
-
-  const CMD_MAP = {
-    profile: 'cat profile.txt',
-    about:   'cat about.md',
-    skills:  'cat skills.txt',
-    projects:'cat projects.json',
-    writeups:'tail -n 3 latest.log',
-    links:   'cat links.txt',
-  };
-
-  const PATH_MAP = {
-    profile: '~/bio',
-    about:   '~/bio/about',
-    skills:  '~/bio/skills',
-    projects:'~/bio/projects',
-    writeups:'~/bio/writeups',
-    links:   '~/bio/links',
-  };
+    sched();
+    return () => clearTimeout(tid);
+  }, [visible]);
 
   return (
-    <div className={`screen${visible ? '' : ' hidden'}`}>
+    <div className={'screen' + (visible ? '' : ' screen-off')}>
       <div className="bio-inner">
-
-        <PromptLine path="~/bio" cmd="open --tabs" />
-
+        <PromptLine path="~/bio" cmd="open --tabs" trigger={null} />
         <div className="tabs-row" role="tablist">
           {TABS.map(t => (
             <button
               key={t}
-              className={`tab-btn${activeTab === t ? ' active' : ''}`}
+              className={'tab-btn' + (activeTab === t ? ' active' : '')}
               role="tab"
               aria-selected={activeTab === t}
               onClick={() => setActiveTab(t)}
-              onMouseEnter={e => scramble(e.currentTarget, t)}
+              onMouseEnter={e => runScramble(e.currentTarget, t)}
             >{t}</button>
           ))}
         </div>
-
         <div className="viewport">
           {TABS.map(t => (
-            <div key={t} className={`page${activeTab === t ? ' active' : ''}`} role="tabpanel">
-              <PromptLine path={PATH_MAP[t]} cmd={CMD_MAP[t]} />
+            <div key={t} className={'page' + (activeTab === t ? ' active' : '')} role="tabpanel">
+              <PromptLine path={PATH_MAP[t]} cmd={CMD_MAP[t]} trigger={trigger} />
               {t === 'links' ? (
                 <div className="links-panel">
                   {LINKS.map(l => (
-                    <a
-                      key={l.href}
-                      className="link-item"
-                      href={l.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      onMouseEnter={e => scramble(e.currentTarget, l.label)}
-                    >{l.label}</a>
+                    <a key={l.href} className="link-item" href={l.href} target="_blank" rel="noreferrer" onMouseEnter={e => runScramble(e.currentTarget, l.label)}>{l.label}</a>
                   ))}
                 </div>
               ) : (
@@ -762,170 +573,96 @@ function BioScreen({ visible, onEscape, activeTab, setActiveTab }) {
               )}
               {t === 'profile' && (
                 <div className="kbd-hint">
-                  <span style={{color:'var(--dim)'}}>Tip: use </span>
-                  <Key>←</Key><span style={{color:'var(--dim)'}}>/</span><Key>→</Key>
-                  <span style={{color:'var(--dim)'}}> to switch tabs</span>
+                  <span>Tip: use </span><Key>{'<-'}</Key><span>/</span><Key>{'->'}</Key><span> to switch tabs</span>
                 </div>
               )}
             </div>
           ))}
         </div>
-
         <div className="footer-bar">
-          <span style={{color:'var(--dim)'}}>keys:</span>
-          <Key>←</Key><span style={{color:'var(--dim)'}}>/</span><Key>→</Key>
-          <span style={{color:'var(--dim)'}}>tabs •</span>
-          <Key>Esc</Key>
-          <span style={{color:'var(--dim)'}}>boot</span>
+          <span>keys:</span><Key>{'<-'}</Key><span>/</span><Key>{'->'}</Key><span>tabs</span><span>•</span><Key>Esc</Key><span>boot</span>
         </div>
-
       </div>
     </div>
   );
 }
 
-// ── App ───────────────────────────────────────────────────────────────────────
 function App() {
   const [screen,    setScreen]    = useState('boot');
   const [activeTab, setActiveTab] = useState('profile');
-  const [ip,        setIp]        = useState('resolving…');
-  const [system,    setSystem]    = useState('loading…');
+  const [trigger,   setTrigger]   = useState(0);
+  const [ip,        setIp]        = useState('resolving...');
+  const [system,    setSystem]    = useState('loading...');
   const [uptime,    setUptime]    = useState('0m');
-  const terminalRef = useRef(null);
-  const startedAt   = useRef(Date.now());
+  const termRef  = useRef(null);
+  const startRef = useRef(Date.now());
 
-  function formatUptime(ms) {
-    const m = Math.floor(ms/60000), h = Math.floor(m/60);
-    return h > 0 ? `${h}h ${m%60}m` : `${m}m`;
-  }
+  const fmt = ms => { const m=Math.floor(ms/60000),h=Math.floor(m/60); return h>0?(h+'h '+(m%60)+'m'):(m+'m'); };
 
   async function detectClient() {
     const ua = navigator.userAgent || '';
     let os = 'unknown';
-    if (navigator.userAgentData?.getHighEntropyValues) {
+    if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
       try {
-        const { platform, platformVersion } = await navigator.userAgentData.getHighEntropyValues(['platform','platformVersion']);
-        if (platform === 'Windows')      os = parseInt(platformVersion,10) >= 13 ? 'Windows 11' : 'Windows 10';
-        else if (platform === 'macOS')   os = 'macOS';
-        else if (platform === 'Android') os = 'Android';
-        else if (platform === 'iOS')     os = 'iOS';
-        else if (platform === 'Linux')   os = 'Linux';
-      } catch {}
+        const d = await navigator.userAgentData.getHighEntropyValues(['platform','platformVersion']);
+        if      (d.platform==='Windows')  os=parseInt(d.platformVersion,10)>=13?'Windows 11':'Windows 10';
+        else if (d.platform==='macOS')    os='macOS';
+        else if (d.platform==='Android')  os='Android';
+        else if (d.platform==='iOS')      os='iOS';
+        else if (d.platform==='Linux')    os='Linux';
+      } catch(e) {}
     }
-    if (os === 'unknown') {
-      if (/Windows NT/.test(ua))            os = 'Windows';
-      else if (/Mac OS X/.test(ua))         os = 'macOS';
-      else if (/Android/.test(ua))          os = 'Android';
-      else if (/iPhone|iPad|iPod/.test(ua)) os = 'iOS';
-      else if (/Linux/.test(ua))            os = 'Linux';
+    if (os==='unknown') {
+      if      (/Windows NT/.test(ua))       os='Windows';
+      else if (/Mac OS X/.test(ua))         os='macOS';
+      else if (/Android/.test(ua))          os='Android';
+      else if (/iPhone|iPad|iPod/.test(ua)) os='iOS';
+      else if (/Linux/.test(ua))            os='Linux';
     }
-    let browser = 'unknown';
-    if (/Edg\//.test(ua))                                  browser = 'Edge';
-    else if (/Chrome\//.test(ua))                          browser = 'Chrome';
-    else if (/Firefox\//.test(ua))                         browser = 'Firefox';
-    else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = 'Safari';
-    return os === 'unknown' ? browser : `${os} (${browser})`;
+    let b='unknown';
+    if      (/Edg\//.test(ua))                              b='Edge';
+    else if (/Chrome\//.test(ua))                           b='Chrome';
+    else if (/Firefox\//.test(ua))                          b='Firefox';
+    else if (/Safari\//.test(ua)&&!/Chrome\//.test(ua))    b='Safari';
+    return os==='unknown'?b:(os+' ('+b+')');
   }
 
   useEffect(() => {
     (async () => {
-      const [resolvedIp, resolvedSystem] = await Promise.all([
-        fetch('https://api.ipify.org?format=json', {cache:'no-store'})
-          .then(r => r.json()).then(d => d.ip || 'unknown').catch(() => 'unknown'),
+      const [ri, rs] = await Promise.all([
+        fetch('https://api.ipify.org?format=json',{cache:'no-store'}).then(r=>r.json()).then(d=>d.ip||'unknown').catch(()=>'unknown'),
         detectClient(),
       ]);
-      setIp(resolvedIp);
-      setSystem(resolvedSystem);
-      setUptime(formatUptime(Date.now() - startedAt.current));
+      setIp(ri); setSystem(rs); setUptime(fmt(Date.now()-startRef.current));
     })();
-    const iv = setInterval(() => setUptime(formatUptime(Date.now() - startedAt.current)), 30000);
+    const iv = setInterval(() => setUptime(fmt(Date.now()-startRef.current)), 30000);
     return () => clearInterval(iv);
   }, []);
 
-  // random periodic scramble on bio screen
-  useEffect(() => {
-    if (screen !== 'bio') return;
-    const scrambleChars = '!<>-_\\/[]{}—=+*^?#________';
-    const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
-    let t;
-    const schedule = () => {
-      t = setTimeout(() => {
-        const els = document.querySelectorAll('.page.active .p-host, .page.active .p-cmd, .page.active .p-path, .title-text');
-        const pool = Array.from(els).filter(e => !e._scrambling);
-        if (pool.length) {
-          const el = pool[rand(0, pool.length-1)];
-          const final = el.innerText;
-          if (!final.trim() || el._scrambling) { schedule(); return; }
-          el._scrambling = true;
-          const oldText = el.innerText, length = Math.max(oldText.length, final.length);
-          const queue = [];
-          for (let i=0;i<length;i++) {
-            queue.push({from:oldText[i]||'',to:final[i]||'',start:Math.floor(Math.random()*40),end:Math.floor(Math.random()*40)+Math.floor(Math.random()*40),char:''});
-          }
-          let frame=0, raf;
-          const upd = () => {
-            let out='',complete=0;
-            for (let i=0;i<queue.length;i++) {
-              const q=queue[i];
-              if(frame>=q.end){complete++;out+=q.to;}
-              else if(frame>=q.start){if(!q.char||Math.random()<0.28)q.char=scrambleChars[Math.floor(Math.random()*scrambleChars.length)];out+=`<span class="dud">${q.char}</span>`;}
-              else out+=q.from;
-            }
-            el.innerHTML=out;
-            if(complete===queue.length){el._scrambling=false;el.innerHTML=final;}
-            else{frame++;raf=requestAnimationFrame(upd);}
-          };
-          upd();
-        }
-        schedule();
-      }, rand(5000, 7000));
-    };
-    schedule();
-    return () => clearTimeout(t);
-  }, [screen]);
+  const handleTab = useCallback(t => {
+    setActiveTab(typeof t === 'function' ? t : () => t);
+    setTrigger(k => k+1);
+  }, []);
 
   return (
-    <div className="stage" onClick={e => { if (screen === 'bio') e.currentTarget.querySelector('.terminal-body')?.focus(); }}>
-      <Particles terminalRef={terminalRef} />
-
-      <div className="terminal-shell" ref={terminalRef}>
+    <div className="stage">
+      <Particles terminalRef={termRef} />
+      <div className="terminal-shell" ref={termRef}>
         <div className="titlebar">
-          <div className="dots">
-            <div className="dot dot-r" />
-            <div className="dot dot-y" />
-            <div className="dot dot-g" />
-          </div>
+          <div className="dots"><div className="dot dot-r"/><div className="dot dot-y"/><div className="dot dot-g"/></div>
           <div className="title-text">session://bio</div>
-          <div />
+          <div/>
         </div>
-
-        <div
-          className="terminal-body"
-          tabIndex={0}
-          onKeyDown={e => {
-            if (screen === 'boot' && e.key === 'Enter') setScreen('bio');
-          }}
-        >
-          <BootScreen
-            visible={screen === 'boot'}
-            onEnter={() => setScreen('bio')}
-            ip={ip}
-            system={system}
-            uptime={uptime}
-          />
-          <BioScreen
-            visible={screen === 'bio'}
-            onEscape={() => setScreen('boot')}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
+        <div className="terminal-body" tabIndex={0}>
+          <BootScreen visible={screen==='boot'} onEnter={()=>setScreen('bio')} ip={ip} system={system} uptime={uptime} />
+          <BioScreen  visible={screen==='bio'}  onEscape={()=>setScreen('boot')} activeTab={activeTab} setActiveTab={handleTab} trigger={trigger} />
         </div>
       </div>
     </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 </script>
 
 </body>
