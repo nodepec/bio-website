@@ -1,27 +1,30 @@
 (() => {
   const CFG = {
-    count:        120,
-    size:         2,
-    speed:        0.35,
-    lifetime:     220,
-    repelRadius:  90,
-    repelForce:   0.18,
-    burstCount:   18,
-    burstSpeed:   3.2,
-    color:        null,
-    opacity:      0.55,
+    count:       120,
+    size:        2,
+    speed:       0.35,
+    lifetime:    220,
+    repelRadius: 90,
+    repelForce:  0.18,
+    burstCount:  18,
+    burstSpeed:  3.2,
+    color:       "#ffffff",
+    opacity:     0.55,
   };
-
 
   const canvas = document.createElement("canvas");
   Object.assign(canvas.style, {
-    position:   "fixed",
-    inset:      "0",
-    pointerEvents: "none",
-    zIndex:     "0",
+    position:       "fixed",
+    inset:          "0",
+    pointerEvents:  "none",
+    zIndex:         "-1",
     imageRendering: "pixelated",
   });
   document.body.prepend(canvas);
+
+  if (getComputedStyle(document.body).position === "static") {
+    document.body.style.position = "relative";
+  }
 
   const ctx = canvas.getContext("2d");
 
@@ -32,27 +35,18 @@
   resize();
   window.addEventListener("resize", resize, { passive: true });
 
-  function resolveColor() {
-    if (CFG.color) return CFG.color;
-    const raw = getComputedStyle(document.documentElement)
-      .getPropertyValue("--accent")
-      .trim();
-    return raw || "#00ff99";
-  }
-
   function randomParticle(burst = false, bx = 0, by = 0) {
     const angle = Math.random() * Math.PI * 2;
     const spd   = burst
       ? CFG.burstSpeed * (0.5 + Math.random())
       : CFG.speed * (0.4 + Math.random() * 0.8);
-
     return {
-      x:     burst ? bx : Math.random() * canvas.width,
-      y:     burst ? by : Math.random() * canvas.height,
-      vx:    Math.cos(angle) * spd,
-      vy:    Math.sin(angle) * spd,
-      phase: Math.random() * Math.PI * 2,
-      life:  burst ? 0 : Math.floor(Math.random() * CFG.lifetime),
+      x:       burst ? bx : Math.random() * canvas.width,
+      y:       burst ? by : Math.random() * canvas.height,
+      vx:      Math.cos(angle) * spd,
+      vy:      Math.sin(angle) * spd,
+      phase:   Math.random() * Math.PI * 2,
+      life:    burst ? 0 : Math.floor(Math.random() * CFG.lifetime),
       maxLife: CFG.lifetime + Math.floor(Math.random() * 80 - 40),
       burst,
     };
@@ -70,24 +64,20 @@
     }
   });
 
-  let color = resolveColor();
   let frameCount = 0;
 
   function tick() {
     requestAnimationFrame(tick);
-
-    if (frameCount % 120 === 0) color = resolveColor();
     frameCount++;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const w = canvas.width;
-    const h = canvas.height;
+    const w  = canvas.width;
+    const h  = canvas.height;
     const r2 = CFG.repelRadius * CFG.repelRadius;
 
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
-
       p.life++;
 
       let alpha;
@@ -102,16 +92,13 @@
       }
 
       if (p.life >= p.maxLife) {
-        if (p.burst) {
-          particles.splice(i, 1);
-          continue;
-        }
+        if (p.burst) { particles.splice(i, 1); continue; }
         Object.assign(p, randomParticle());
         continue;
       }
 
-      const dx = p.x - mouse.x;
-      const dy = p.y - mouse.y;
+      const dx    = p.x - mouse.x;
+      const dy    = p.y - mouse.y;
       const dist2 = dx * dx + dy * dy;
       if (dist2 < r2 && dist2 > 0) {
         const dist  = Math.sqrt(dist2);
@@ -132,13 +119,13 @@
       p.y += p.vy;
 
       const buf = 4;
-      if (p.x < -buf)  p.x = w + buf;
+      if (p.x < -buf)    p.x = w + buf;
       if (p.x > w + buf) p.x = -buf;
-      if (p.y < -buf)  p.y = h + buf;
+      if (p.y < -buf)    p.y = h + buf;
       if (p.y > h + buf) p.y = -buf;
 
       ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
-      ctx.fillStyle   = color;
+      ctx.fillStyle   = CFG.color;
       ctx.fillRect(Math.round(p.x), Math.round(p.y), CFG.size, CFG.size);
     }
 
