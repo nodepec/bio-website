@@ -1,6 +1,8 @@
-import express from "express";
-import path from "path";
+import express    from "express";
+import path       from "path";
 import { fileURLToPath } from "url";
+import compression from "compression";
+import helmet      from "helmet";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUB  = path.join(__dirname, "public");
@@ -9,6 +11,8 @@ const DEV  = process.env.NODE_ENV === "development";
 
 const app = express();
 
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(compression());
 app.use(express.static(PUB, { extensions: ["html"] }));
 
 app.use((req, res) => {
