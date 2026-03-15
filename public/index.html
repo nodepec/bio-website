@@ -27,21 +27,14 @@
 
   <div class="terminal-body" id="terminal" tabindex="0">
 
-    <!-- boot screen -->
     <div class="boot" id="boot" aria-label="Boot screen">
       <div class="boot-center">
 
         <pre class="ascii mono" id="ascii-logo" aria-hidden="true"></pre>
 
-        <div class="boot-info mono" id="boot-lines" aria-live="polite">
-          <div><span class="label">IP:</span>     <span id="bio-ip">loading&#8230;</span></div>
-          <div><span class="label">System:</span> <span id="bio-system">loading&#8230;</span></div>
-          <div><span class="label">Uptime:</span> <span id="bio-uptime">loading&#8230;</span></div>
-          <div class="spacer"></div>
-          <div>Bio Loaded</div>
-        </div>
+        <div class="boot-info mono" id="boot-lines" aria-live="polite"></div>
 
-        <div class="hint mono">
+        <div class="hint mono" id="boot-hint" style="display:none">
           <span class="dim">Press</span>
           <span class="key" id="enter-key">Enter</span>
           <span class="dim">to continue</span>
@@ -50,7 +43,6 @@
       </div>
     </div>
 
-    <!-- bio screen -->
     <div class="bio hidden mono" id="bio" aria-label="Bio screen">
 
       <div class="bio-top">
@@ -71,7 +63,6 @@
 
       <div class="viewport" aria-label="Content viewport">
 
-        <!-- profile -->
         <section class="page active" id="page-profile" data-page="profile" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio</span><span class="dim">$</span>
@@ -92,17 +83,16 @@ Notes:
           <div class="kbd-hint">
             <span class="dim">Tip:</span> use
             <span class="key">&#8592;</span>/<span class="key">&#8594;</span>
-            to switch tabs
+            to switch tabs &bull; type a command below
           </div>
         </section>
 
-        <!-- about -->
         <section class="page" id="page-about" data-page="about" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/about</span><span class="dim">$</span>
             <span class="cmd">cat about.md</span>
           </div>
-          <pre class="panel">
+          <pre class="panel typed-panel" id="panel-about">
 I like difficult challenges that make me think
 small hypotheses &#8594; quick tests &#8594; record &#8594; refine
 
@@ -113,13 +103,12 @@ I'm most interested in:
           </pre>
         </section>
 
-        <!-- skills -->
         <section class="page" id="page-skills" data-page="skills" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/skills</span><span class="dim">$</span>
             <span class="cmd">cat skills.txt</span>
           </div>
-          <pre class="panel">
+          <pre class="panel typed-panel" id="panel-skills">
 Coding:
 - JavaScript, Python, Html, Css
 
@@ -132,13 +121,12 @@ Tools:
           </pre>
         </section>
 
-        <!-- projects -->
         <section class="page" id="page-projects" data-page="projects" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/projects</span><span class="dim">$</span>
             <span class="cmd">cat projects.json</span>
           </div>
-          <pre class="panel">
+          <pre class="panel typed-panel" id="panel-projects">
 https://nodepec.github.io/The-Challenges/
 
 This is my self made ctf challenges that use ai to adapt my encryption methods into an interactive story that
@@ -146,20 +134,18 @@ makes you feel like it is something meaningful
           </pre>
         </section>
 
-        <!-- writeups -->
         <section class="page" id="page-writeups" data-page="writeups" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/writeups</span><span class="dim">$</span>
             <span class="cmd">tail -n 3 latest.log</span>
           </div>
-          <pre class="panel">
+          <pre class="panel typed-panel" id="panel-writeups">
 [placeholder] lorem ipsum dolor sit amet
 [placeholder] lorem ipsum dolor sit amet
 [placeholder] lorem ipsum dolor sit amet
           </pre>
         </section>
 
-        <!-- links -->
         <section class="page" id="page-links" data-page="links" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/links</span><span class="dim">$</span>
@@ -173,12 +159,25 @@ makes you feel like it is something meaningful
 
       </div>
 
+      <div class="cmd-row" id="cmd-row">
+        <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio</span><span class="dim">$&nbsp;</span>
+        <input class="cmd-input" id="cmd-input" type="text" autocomplete="off" spellcheck="false" aria-label="Terminal command input" />
+      </div>
+
+      <div class="cmd-output" id="cmd-output" aria-live="polite"></div>
+
       <div class="footer-line">
         <span class="dim">Keys:</span>
         <span class="key">&#8592;</span>/<span class="key">&#8594;</span> tabs &#8226;
         <span class="key">Esc</span> back to boot
       </div>
 
+    </div>
+
+    <canvas id="matrix-canvas" aria-hidden="true"></canvas>
+
+    <div class="easter-egg hidden" id="easter-egg" aria-live="assertive">
+      <pre id="easter-text"></pre>
     </div>
 
   </div>
