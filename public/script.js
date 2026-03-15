@@ -1,289 +1,383 @@
-const HACKER_CAT = '     welcome!\n    /\\_/\\           ___\n   = o_o =_______    \\ \\ \n    __^      __(  \\.__) )\n(@)<_____>__(_____)____/';
+const terminal  = document.getElementById("terminal");
+const boot      = document.getElementById("boot");
+const bio       = document.getElementById("bio");
+const elIp      = document.getElementById("bio-ip");
+const elSystem  = document.getElementById("bio-system");
+const elUptime  = document.getElementById("bio-uptime");
+const asciiEl   = document.getElementById("ascii-logo");
+const tabs      = Array.from(document.querySelectorAll(".tab"));
+const pages     = Array.from(document.querySelectorAll(".page"));
+const startedAt = Date.now();
 
-const TABS = ['profile','about','skills','projects','writeups','links'];
+const HACKER_CAT = String.raw`
+     welcome!
+    /\_/\           ___
+   = o_o =_______    \ \ 
+    __^      __(  \.__) )
+(@)<_____>__(_____)____/
+`;
 
-const CONTENT = {
-  profile:  'Name:       [REDACTED]\nHandle:     @nodepec\nFocus:      CTF / web / cyber security\nLocation:   Perth, AU\nStatus:     learning + building\n\nNotes:\n- I participate in ctf events every now and then\n- I keep solutions to the main challenges\n- I dont like boring stuff',
-  about:    'I like difficult challenges that make me think\nsmall hypotheses -> quick tests -> record -> refine\n\nI\'m most interested in:\n- web apps\n- cryptography\n- open source intelligence',
-  skills:   'Coding:\n- JavaScript, Python, Html, Css\n\nCTF / security:\n- web fundamentals, auth flows, input handling mindset\n- writeups: assumptions -> tests -> evidence -> lesson\n\nTools:\n- Burp (learning), Wireshark (also learning), Ghidra (ultra noob)',
-  projects: 'https://nodepec.github.io/The-Challenges/\n\nThis is my self made ctf challenges that use ai to adapt my\nencryption methods into an interactive story that makes you\nfeel like it is something meaningful',
-  writeups: '[placeholder] lorem ipsum dolor sit amet\n[placeholder] lorem ipsum dolor sit amet\n[placeholder] lorem ipsum dolor sit amet',
-};
-
-const LINKS = [
-  { href: 'https://github.com/nodepec',      label: 'github://nodepec' },
-  { href: 'https://ctftime.org/team/402033', label: 'ctftime://team'   },
-];
-
-const CMD_MAP  = { profile:'cat profile.txt', about:'cat about.md', skills:'cat skills.txt', projects:'cat projects.json', writeups:'tail -n 3 latest.log', links:'cat links.txt' };
-const PATH_MAP = { profile:'~/bio', about:'~/bio/about', skills:'~/bio/skills', projects:'~/bio/projects', writeups:'~/bio/writeups', links:'~/bio/links' };
-
-const SC   = '!<>-_\\/[]{}=+*^?#________';
-const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
-
-function scramble(el, final) {
-  if (!el || el._sc) return;
-  const old = el.innerText || '';
-  const len = Math.max(old.length, final.length);
-  const q   = [];
-  for (let i = 0; i < len; i++) {
-    const s = rand(0, 39);
-    q.push({ from: old[i] || '', to: final[i] || '', start: s, end: s + rand(0, 39), char: '' });
-  }
-  el._sc = true;
-  let f = 0;
-  const run = () => {
-    let out = '', done = 0;
-    for (let i = 0; i < q.length; i++) {
-      const e = q[i];
-      if      (f >= e.end)   { done++; out += e.to; }
-      else if (f >= e.start) { if (!e.char || Math.random() < .28) e.char = SC[rand(0, SC.length - 1)]; out += '<span class="dud">' + e.char + '</span>'; }
-      else                   { out += e.from; }
-    }
-    el.innerHTML = out;
-    if (done === q.length) { el._sc = false; el.innerHTML = final; }
-    else { f++; requestAnimationFrame(run); }
-  };
-  run();
+function safeText(el, value) {
+  if (el) el.textContent = value ?? "unknown";
 }
 
-document.querySelectorAll('.key').forEach(k => {
-  k.addEventListener('mouseenter', () => scramble(k, k.innerText));
-});
+function formatUptime(ms) {
+  const totalMin = Math.floor(ms / 60_000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
 
-document.getElementById('ascii-art').textContent = HACKER_CAT;
-
-const tabsRow  = document.getElementById('tabs-row');
-const viewport = document.getElementById('viewport');
-
-TABS.forEach(t => {
-  const btn = document.createElement('button');
-  btn.className   = 'tab-btn' + (t === 'profile' ? ' active' : '');
-  btn.role        = 'tab';
-  btn.dataset.tab = t;
-  btn.textContent = t;
-  btn.addEventListener('mouseenter', () => scramble(btn, t));
-  tabsRow.appendChild(btn);
-
-  const page    = document.createElement('div');
-  page.className = 'page' + (t === 'profile' ? ' active' : '');
-  page.id        = 'page-' + t;
-  page.role      = 'tabpanel';
-
-  const pl = document.createElement('div');
-  pl.className = 'prompt-line';
-  pl.innerHTML = '<span class="p-host">user@host</span><span class="p-dim">:</span><span class="p-path">' + PATH_MAP[t] + '</span><span class="p-dim">$ </span><span class="p-cmd">' + CMD_MAP[t] + '</span>';
-  page.appendChild(pl);
-
-  if (t === 'links') {
-    const lp = document.createElement('div');
-    lp.className = 'links-panel';
-    LINKS.forEach(l => {
-      const a     = document.createElement('a');
-      a.className = 'link-item';
-      a.href      = l.href;
-      a.target    = '_blank';
-      a.rel       = 'noreferrer';
-      a.textContent = l.label;
-      a.addEventListener('mouseenter', () => scramble(a, l.label));
-      lp.appendChild(a);
-    });
-    page.appendChild(lp);
-  } else {
-    const pre     = document.createElement('pre');
-    pre.className = 'panel';
-    pre.textContent = CONTENT[t];
-    page.appendChild(pre);
+async function detectClient() {
+  const ua = navigator.userAgent || "";
+  let os = "unknown";
+  if (navigator.userAgentData?.getHighEntropyValues) {
+    try {
+      const { platform, platformVersion } = await navigator.userAgentData.getHighEntropyValues(["platform", "platformVersion"]);
+      if (platform === "Windows")      os = parseInt(platformVersion, 10) >= 13 ? "Windows 11" : "Windows 10";
+      else if (platform === "macOS")   os = "macOS";
+      else if (platform === "Android") os = "Android";
+      else if (platform === "iOS")     os = "iOS";
+      else if (platform === "Linux")   os = "Linux";
+    } catch {}
   }
-
-  if (t === 'profile') {
-    const hint    = document.createElement('div');
-    hint.className = 'kbd-hint';
-    hint.innerHTML = 'Tip: use <kbd class="key">&larr;</kbd>/<kbd class="key">&rarr;</kbd> to switch tabs';
-    hint.querySelectorAll('.key').forEach(k => k.addEventListener('mouseenter', () => scramble(k, k.innerText)));
-    page.appendChild(hint);
+  if (os === "unknown") {
+    if (/Windows NT/.test(ua))            os = "Windows";
+    else if (/Mac OS X/.test(ua))         os = "macOS";
+    else if (/Android/.test(ua))          os = "Android";
+    else if (/iPhone|iPad|iPod/.test(ua)) os = "iOS";
+    else if (/Linux/.test(ua))            os = "Linux";
   }
+  let browser = "unknown";
+  if (/Edg\//.test(ua))                                  browser = "Edge";
+  else if (/Chrome\//.test(ua))                          browser = "Chrome";
+  else if (/Firefox\//.test(ua))                         browser = "Firefox";
+  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = "Safari";
+  return os === "unknown" ? browser : `${os} (${browser})`;
+}
 
-  viewport.appendChild(page);
-});
-
-let activeTab = 'profile';
-
-function setTab(name) {
-  activeTab = name;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
-  const page = document.getElementById('page-' + name);
-  if (page) {
-    scramble(page.querySelector('.p-host'), 'user@host');
-    scramble(page.querySelector('.p-cmd'),  CMD_MAP[name]);
+async function getPublicIP() {
+  try {
+    const res = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
+    if (!res.ok) throw new Error();
+    const { ip } = await res.json();
+    return ip || "unknown";
+  } catch {
+    return "unknown";
   }
 }
 
-tabsRow.addEventListener('click', e => {
-  const btn = e.target.closest('.tab-btn');
-  if (btn) setTab(btn.dataset.tab);
-});
-
-const bootScreen = document.getElementById('boot-screen');
-const bioScreen  = document.getElementById('bio-screen');
+async function fillBoot() {
+  if (asciiEl) asciiEl.textContent = HACKER_CAT.trimEnd();
+  safeText(elIp, "resolving\u2026");
+  const [ip, system] = await Promise.all([getPublicIP(), detectClient()]);
+  safeText(elIp, ip);
+  safeText(elSystem, system);
+  safeText(elUptime, formatUptime(Date.now() - startedAt));
+  setInterval(() => safeText(elUptime, formatUptime(Date.now() - startedAt)), 30_000);
+}
 
 function showBio() {
-  bootScreen.classList.add('screen-off');
-  bioScreen.classList.remove('screen-off');
-  document.getElementById('terminal').focus();
-  scramble(document.getElementById('bio-host'), 'user@host');
+  boot.classList.add("hidden");
+  bio.classList.remove("hidden");
+  terminal.focus({ preventScroll: true });
 }
 
 function showBoot() {
-  bioScreen.classList.add('screen-off');
-  bootScreen.classList.remove('screen-off');
-  document.getElementById('terminal').focus();
+  bio.classList.add("hidden");
+  boot.classList.remove("hidden");
+  terminal.focus({ preventScroll: true });
 }
 
-window.addEventListener('keydown', e => {
-  const onBoot = !bootScreen.classList.contains('screen-off');
-  if (onBoot) {
-    if (e.key === 'Enter') {
-      scramble(document.getElementById('enter-key'), 'Enter');
-      setTimeout(showBio, 100);
-    }
+function setActivePage(name) {
+  for (const t of tabs) {
+    const active = t.dataset.page === name;
+    t.classList.toggle("active", active);
+    t.setAttribute("aria-selected", String(active));
+  }
+  for (const p of pages) p.classList.toggle("active", p.dataset.page === name);
+}
+
+function nextTab(dir) {
+  const idx = Math.max(0, tabs.findIndex(t => t.classList.contains("active")));
+  setActivePage(tabs[(idx + dir + tabs.length) % tabs.length].dataset.page);
+}
+
+tabs.forEach(btn => btn.addEventListener("click", () => setActivePage(btn.dataset.page)));
+
+window.addEventListener("keydown", e => {
+  if (!boot.classList.contains("hidden")) {
+    if (e.key === "Enter") showBio();
     return;
   }
-  const idx = TABS.indexOf(activeTab);
-  if      (e.key === 'ArrowRight') setTab(TABS[(idx + 1) % TABS.length]);
-  else if (e.key === 'ArrowLeft')  setTab(TABS[(idx - 1 + TABS.length) % TABS.length]);
-  else if (e.key === 'Escape')     showBoot();
+  if (!bio.classList.contains("hidden")) {
+    if (e.key === "ArrowRight")     nextTab(+1);
+    else if (e.key === "ArrowLeft") nextTab(-1);
+    else if (e.key === "Escape")    showBoot();
+  }
 });
 
-document.getElementById('terminal').addEventListener('click', () => document.getElementById('terminal').focus());
+terminal.addEventListener("click", () => terminal.focus());
 
-const titleEl = document.getElementById('title-text');
-titleEl.addEventListener('mouseenter', () => scramble(titleEl, 'session://bio'));
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.chars = '!<>-_\\/[]{}—=+*^?#________';
+    this.update = this.update.bind(this);
+  }
 
-function scheduleScramble() {
-  setTimeout(() => {
-    const onBoot = !bootScreen.classList.contains('screen-off');
-    if (onBoot) {
-      const ids = ['bv-ip', 'bv-sys', 'bv-up'];
-      const el  = document.getElementById(ids[rand(0, 2)]);
-      if (el && !el._sc && el.textContent && el.textContent !== 'resolving...' && el.textContent !== 'loading...') {
-        scramble(el, el.textContent);
-      }
-    } else {
-      const pool = Array.from(document.querySelectorAll('.page.active .p-host, .page.active .p-cmd, .page.active .p-path, .title-text')).filter(el => !el._sc && el.innerText && el.innerText.trim());
-      if (pool.length) {
-        const el = pool[rand(0, pool.length - 1)];
-        scramble(el, el.innerText);
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length  = Math.max(oldText.length, newText.length);
+    const promise = new Promise(resolve => this.resolve = resolve);
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from  = oldText[i] || '';
+      const to    = newText[i] || '';
+      const start = Math.floor(Math.random() * 40);
+      const end   = start + Math.floor(Math.random() * 40);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+
+  update() {
+    let output = '', complete = 0;
+    for (let i = 0, n = this.queue.length; i < n; i++) {
+      let { from, to, start, end, char } = this.queue[i];
+      if (this.frame >= end) {
+        complete++;
+        output += to;
+      } else if (this.frame >= start) {
+        if (!char || Math.random() < 0.28) {
+          char = this.chars[Math.floor(Math.random() * this.chars.length)];
+          this.queue[i].char = char;
+        }
+        output += `<span class="dud">${char}</span>`;
+      } else {
+        output += from;
       }
     }
-    scheduleScramble();
-  }, rand(5000, 7000));
-}
-scheduleScramble();
-
-const startedAt = Date.now();
-const fmt = ms => { const m = Math.floor(ms / 60000), h = Math.floor(m / 60); return h > 0 ? (h + 'h ' + (m % 60) + 'm') : (m + 'm'); };
-
-async function detectClient() {
-  const ua = navigator.userAgent || '';
-  let os = 'unknown';
-  if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
-    try {
-      const d = await navigator.userAgentData.getHighEntropyValues(['platform', 'platformVersion']);
-      if      (d.platform === 'Windows')  os = parseInt(d.platformVersion, 10) >= 13 ? 'Windows 11' : 'Windows 10';
-      else if (d.platform === 'macOS')    os = 'macOS';
-      else if (d.platform === 'Android')  os = 'Android';
-      else if (d.platform === 'iOS')      os = 'iOS';
-      else if (d.platform === 'Linux')    os = 'Linux';
-    } catch(e) {}
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(this.update);
+      this.frame++;
+    }
   }
-  if (os === 'unknown') {
-    if      (/Windows NT/.test(ua))        os = 'Windows';
-    else if (/Mac OS X/.test(ua))          os = 'macOS';
-    else if (/Android/.test(ua))           os = 'Android';
-    else if (/iPhone|iPad|iPod/.test(ua))  os = 'iOS';
-    else if (/Linux/.test(ua))             os = 'Linux';
-  }
-  let b = 'unknown';
-  if      (/Edg\//.test(ua))                             b = 'Edge';
-  else if (/Chrome\//.test(ua))                          b = 'Chrome';
-  else if (/Firefox\//.test(ua))                         b = 'Firefox';
-  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) b = 'Safari';
-  return os === 'unknown' ? b : (os + ' (' + b + ')');
 }
 
-(async () => {
-  const [ip, sys] = await Promise.all([
-    fetch('https://api.ipify.org?format=json', { cache: 'no-store' }).then(r => r.json()).then(d => d.ip || 'unknown').catch(() => 'unknown'),
-    detectClient(),
-  ]);
-  const ipEl  = document.getElementById('bv-ip');
-  const sysEl = document.getElementById('bv-sys');
-  const upEl  = document.getElementById('bv-up');
-  scramble(ipEl,  ip);
-  scramble(sysEl, sys);
-  scramble(upEl,  fmt(Date.now() - startedAt));
-  setInterval(() => { if (upEl && !upEl._sc) upEl.textContent = fmt(Date.now() - startedAt); }, 30000);
-})();
+function doScramble(el) {
+  if (el._scrambling) return;
+  const val = el.innerText;
+  if (!val || !val.trim()) return;
+  el._scrambling = true;
+  new TextScramble(el).setText(val).then(() => { el._scrambling = false; });
+}
 
-(function() {
-  const canvas = document.getElementById('particles');
-  const ctx    = canvas.getContext('2d');
-  const shell  = document.getElementById('shell');
-  const C = { count:110, size:2, speed:.35, lifetime:220, rr:90, rf:.18, bc:18, bs:3.2, op:.5 };
-  const r2 = C.rr * C.rr, PAD = 14;
-  let tr = { l:0, t:0, r:0, b:0 }, W = 0, H = 0;
+function initGlitch() {
+  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-  const inT = (x, y) => x >= tr.l && x <= tr.r && y >= tr.t && y <= tr.b;
+  ["bio-ip", "bio-system", "bio-uptime"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    new MutationObserver(() => {
+      if (el._scrambling) return;
+      const val = el.innerText;
+      if (!val || val === "loading\u2026" || val === "resolving\u2026") return;
+      el._scrambling = true;
+      new TextScramble(el).setText(val).then(() => { el._scrambling = false; });
+    }).observe(el, { childList: true, characterData: true, subtree: true });
+  });
 
-  function rsz() {
-    W = canvas.offsetWidth; H = canvas.offsetHeight; canvas.width = W; canvas.height = H;
-    const cr = canvas.getBoundingClientRect(), s = shell.getBoundingClientRect();
-    tr = { l: s.left - cr.left - PAD, t: s.top - cr.top - PAD, r: s.right - cr.left + PAD, b: s.bottom - cr.top + PAD };
+  tabs.forEach(btn => {
+    btn.addEventListener("click", () => {
+      setTimeout(() => {
+        document.querySelectorAll(".page.active .prompt, .page.active .cmd, .page.active .path").forEach(doScramble);
+      }, 10);
+    });
+  });
+
+  document.querySelectorAll(".tab, .link, .key").forEach(el => {
+    el.addEventListener("mouseenter", () => doScramble(el));
+  });
+
+  const enterKey = document.querySelector(".hint .key");
+  if (enterKey) {
+    window.addEventListener("keydown", e => { if (e.key === "Enter") doScramble(enterKey); });
   }
 
-  function mp(burst, bx, by) {
-    burst = !!burst; bx = bx || 0; by = by || 0;
-    const a = Math.random() * Math.PI * 2;
-    const spd = burst ? C.bs * (0.5 + Math.random()) : C.speed * (0.4 + Math.random() * 0.8);
+  (function scheduleRandom() {
+    setTimeout(() => {
+      const onBoot = !boot.classList.contains("hidden");
+      if (onBoot) {
+        const ids = ["bio-ip", "bio-system", "bio-uptime"];
+        const el  = document.getElementById(ids[rand(0, ids.length - 1)]);
+        if (el && el.innerText && el.innerText !== "loading\u2026" && el.innerText !== "resolving\u2026") doScramble(el);
+      } else {
+        const pool = [
+          ...document.querySelectorAll(".page.active .prompt"),
+          ...document.querySelectorAll(".page.active .cmd"),
+          ...document.querySelectorAll(".page.active .path"),
+          document.querySelector(".title"),
+          document.querySelector(".bio-top .prompt-line .prompt"),
+          document.querySelector(".bio-top .prompt-line .cmd"),
+        ].filter(el => el && !el._scrambling);
+        if (pool.length) doScramble(pool[rand(0, pool.length - 1)]);
+      }
+      scheduleRandom();
+    }, rand(5000, 7000));
+  })();
+}
+
+function initParticles() {
+  const CFG = {
+    count: 120, size: 2, speed: 0.35, lifetime: 220,
+    repelRadius: 90, repelForce: 0.18,
+    burstCount: 18, burstSpeed: 3.2,
+    color: "#ffffff", opacity: 0.55,
+  };
+
+  const stage      = document.querySelector(".stage");
+  const terminalEl = document.querySelector("section.terminal");
+  const PAD        = 12;
+  const canvas     = document.createElement("canvas");
+
+  Object.assign(canvas.style, {
+    position: "absolute", inset: "0",
+    width: "100%", height: "100%",
+    pointerEvents: "none", zIndex: "0",
+    imageRendering: "pixelated",
+  });
+
+  stage.style.position      = "relative";
+  terminalEl.style.position = "relative";
+  terminalEl.style.zIndex   = "1";
+  stage.prepend(canvas);
+
+  const ctx = canvas.getContext("2d");
+  let termRect = { left: 0, top: 0, right: 0, bottom: 0 };
+
+  function resize() {
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    const cr = canvas.getBoundingClientRect();
+    const tr = terminalEl.getBoundingClientRect();
+    termRect = {
+      left:   tr.left   - cr.left - PAD,
+      top:    tr.top    - cr.top  - PAD,
+      right:  tr.right  - cr.left + PAD,
+      bottom: tr.bottom - cr.top  + PAD,
+    };
+  }
+  resize();
+  window.addEventListener("resize", resize, { passive: true });
+
+  const inTerminal = (x, y) =>
+    x >= termRect.left && x <= termRect.right &&
+    y >= termRect.top  && y <= termRect.bottom;
+
+  function randomParticle(burst, bx, by) {
+    burst = burst || false; bx = bx || 0; by = by || 0;
+    const angle = Math.random() * Math.PI * 2;
+    const spd   = burst
+      ? CFG.burstSpeed * (0.5 + Math.random())
+      : CFG.speed * (0.4 + Math.random() * 0.8);
     let x, y;
-    if (burst) { x = bx; y = by; } else { do { x = Math.random() * W; y = Math.random() * H; } while (inT(x, y)); }
-    return { x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, phase: Math.random() * Math.PI * 2, life: burst ? 0 : Math.floor(Math.random() * C.lifetime), maxLife: C.lifetime + Math.floor(Math.random() * 80 - 40), burst };
+    if (burst) { x = bx; y = by; }
+    else { do { x = Math.random() * canvas.width; y = Math.random() * canvas.height; } while (inTerminal(x, y)); }
+    return {
+      x, y,
+      vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd,
+      phase: Math.random() * Math.PI * 2,
+      life: burst ? 0 : Math.floor(Math.random() * CFG.lifetime),
+      maxLife: CFG.lifetime + Math.floor(Math.random() * 80 - 40),
+      burst,
+    };
   }
 
-  const ps    = Array.from({ length: C.count }, () => mp());
+  const particles = Array.from({ length: CFG.count }, () => randomParticle());
   const mouse = { x: -9999, y: -9999 };
-  let fc = 0;
+  const r2    = CFG.repelRadius * CFG.repelRadius;
 
-  window.addEventListener('mousemove',  e  => { const cr = canvas.getBoundingClientRect(); mouse.x = e.clientX - cr.left; mouse.y = e.clientY - cr.top; }, { passive: true });
-  window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; }, { passive: true });
-  window.addEventListener('click', e => { const cr = canvas.getBoundingClientRect(), x = e.clientX - cr.left, y = e.clientY - cr.top; if (inT(x, y)) return; for (let i = 0; i < C.bc; i++) ps.push(mp(true, x, y)); });
-  window.addEventListener('resize', rsz, { passive: true });
-  rsz();
+  window.addEventListener("mousemove", e => {
+    const cr = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - cr.left;
+    mouse.y = e.clientY - cr.top;
+  }, { passive: true });
+
+  window.addEventListener("mouseleave", () => { mouse.x = -9999; mouse.y = -9999; }, { passive: true });
+
+  window.addEventListener("click", e => {
+    const cr = canvas.getBoundingClientRect();
+    const x = e.clientX - cr.left, y = e.clientY - cr.top;
+    if (inTerminal(x, y)) return;
+    for (let i = 0; i < CFG.burstCount; i++) particles.push(randomParticle(true, x, y));
+  });
+
+  let frameCount = 0;
 
   (function tick() {
-    requestAnimationFrame(tick); fc++;
-    ctx.clearRect(0, 0, W, H);
-    for (let i = ps.length - 1; i >= 0; i--) {
-      const p = ps[i]; p.life++;
-      let a;
-      if      (p.life < 20)               a = (p.life / 20) * C.op;
-      else if (p.life > p.maxLife - 40)   a = ((p.maxLife - p.life) / 40) * C.op;
-      else                                a = C.op;
-      if (p.life >= p.maxLife) { if (p.burst) { ps.splice(i, 1); continue; } Object.assign(p, mp()); continue; }
-      const dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
-      if (d2 < r2 && d2 > 0) { const d = Math.sqrt(d2), f = C.rf * (1 - d / C.rr); p.vx += (dx / d) * f; p.vy += (dy / d) * f; }
-      p.vx *= .97; p.vy *= .97;
-      if (!p.burst) { p.vx += Math.sin(p.phase + fc * .012) * .008; p.vy += Math.cos(p.phase + fc * .009) * .008; }
+    requestAnimationFrame(tick);
+    frameCount++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const w = canvas.width, h = canvas.height;
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life++;
+      let alpha;
+      if (p.life < 20)                  alpha = (p.life / 20) * CFG.opacity;
+      else if (p.life > p.maxLife - 40) alpha = ((p.maxLife - p.life) / 40) * CFG.opacity;
+      else                              alpha = CFG.opacity;
+
+      if (p.life >= p.maxLife) {
+        if (p.burst) { particles.splice(i, 1); continue; }
+        Object.assign(p, randomParticle());
+        continue;
+      }
+
+      const dx = p.x - mouse.x, dy = p.y - mouse.y;
+      const dist2 = dx * dx + dy * dy;
+      if (dist2 < r2 && dist2 > 0) {
+        const dist  = Math.sqrt(dist2);
+        const force = CFG.repelForce * (1 - dist / CFG.repelRadius);
+        p.vx += (dx / dist) * force;
+        p.vy += (dy / dist) * force;
+      }
+
+      p.vx *= 0.97; p.vy *= 0.97;
+
+      if (!p.burst) {
+        p.vx += Math.sin(p.phase + frameCount * 0.012) * 0.008;
+        p.vy += Math.cos(p.phase + frameCount * 0.009) * 0.008;
+      }
+
       p.x += p.vx; p.y += p.vy;
+
       const buf = 4;
-      if (p.x < -buf) p.x = W + buf; if (p.x > W + buf) p.x = -buf;
-      if (p.y < -buf) p.y = H + buf; if (p.y > H + buf) p.y = -buf;
-      if (inT(p.x, p.y)) continue;
-      ctx.globalAlpha = Math.max(0, Math.min(1, a)); ctx.fillStyle = '#fff'; ctx.fillRect(Math.round(p.x), Math.round(p.y), C.size, C.size);
+      if (p.x < -buf)    p.x = w + buf;
+      if (p.x > w + buf) p.x = -buf;
+      if (p.y < -buf)    p.y = h + buf;
+      if (p.y > h + buf) p.y = -buf;
+
+      if (inTerminal(p.x, p.y)) continue;
+
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+      ctx.fillStyle   = CFG.color;
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), CFG.size, CFG.size);
     }
-    while (ps.filter(p => !p.burst).length < C.count) ps.push(mp());
+
+    while (particles.filter(p => !p.burst).length < CFG.count) particles.push(randomParticle());
     ctx.globalAlpha = 1;
   })();
-})();
+}
+
+fillBoot();
+setActivePage("profile");
+initGlitch();
+initParticles();
