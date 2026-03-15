@@ -21,11 +21,23 @@ function safeText(el, value) {
   if (el) el.textContent = value ?? "unknown";
 }
 
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
 function formatUptime(ms) {
-  const totalMin = Math.floor(ms / 60_000);
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  if (h > 0) return `${h}h ${m % 60}m ${s % 60}s`;
+  if (m > 0) return `${m}m ${s % 60}s`;
+  return `${s}s`;
+}
+
+function startUptimeTick() {
+  const el = document.getElementById("bio-uptime");
+  if (!el) return;
+  setInterval(() => {
+    if (!el._scrambling) el.textContent = formatUptime(Date.now() - startedAt);
+  }, 1000);
 }
 
 async function detectClient() {
@@ -69,24 +81,55 @@ async function getPublicIP() {
 
 async function fillBoot() {
   if (asciiEl) asciiEl.textContent = HACKER_CAT.trimEnd();
-  safeText(elIp, "resolving\u2026");
+
+  const container = document.getElementById("boot-lines");
+  const hint      = document.getElementById("boot-hint");
+
+  function addLine(html, delay) {
+    return sleep(delay).then(() => {
+      const div = document.createElement("div");
+      div.className = "boot-line";
+      div.innerHTML = html;
+      container.appendChild(div);
+      requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add("show")));
+    });
+  }
+
+  await addLine('<span class="ok">[OK]</span> <span class="label">init</span> system boot sequence', 120);
+  await addLine('<span class="ok">[OK]</span> <span class="label">load</span> kernel modules', 220);
+
   const [ip, system] = await Promise.all([getPublicIP(), detectClient()]);
-  safeText(elIp, ip);
-  safeText(elSystem, system);
-  safeText(elUptime, formatUptime(Date.now() - startedAt));
-  setInterval(() => safeText(elUptime, formatUptime(Date.now() - startedAt)), 30_000);
+
+  await addLine(`<span class="ok">[OK]</span> <span class="label">net</span> interface up`, 180);
+  await addLine(`<span class="ok">[OK]</span> <span class="label">IP</span> <span id="bio-ip">${ip}</span>`, 140);
+  await addLine(`<span class="ok">[OK]</span> <span class="label">sys</span> <span id="bio-system">${system}</span>`, 160);
+  await addLine(`<span class="ok">[OK]</span> <span class="label">uptime</span> <span id="bio-uptime">${formatUptime(Date.now() - startedAt)}</span>`, 120);
+
+  const spacer = document.createElement("div");
+  spacer.className = "boot-info spacer";
+  container.appendChild(spacer);
+
+  await addLine('<span style="color:rgba(233,233,233,.9)">Bio Loaded</span>', 200);
+
+  await sleep(300);
+  hint.style.display = "";
+  requestAnimationFrame(() => requestAnimationFrame(() => hint.classList.add("show")));
+
+  startUptimeTick();
 }
 
 function showBio() {
   boot.classList.add("hidden");
   bio.classList.remove("hidden");
   terminal.focus({ preventScroll: true });
+  document.getElementById("cmd-input")?.focus();
 }
 
 function showBoot() {
   bio.classList.add("hidden");
   boot.classList.remove("hidden");
   terminal.focus({ preventScroll: true });
+  stopMatrix();
 }
 
 function setActivePage(name) {
@@ -96,6 +139,7 @@ function setActivePage(name) {
     t.setAttribute("aria-selected", String(active));
   }
   for (const p of pages) p.classList.toggle("active", p.dataset.page === name);
+  typePanel(name);
 }
 
 function nextTab(dir) {
@@ -105,19 +149,52 @@ function nextTab(dir) {
 
 tabs.forEach(btn => btn.addEventListener("click", () => setActivePage(btn.dataset.page)));
 
+const panelOriginals = {};
+let typingRaf = null;
+
+function typePanel(name) {
+  const panel = document.getElementById(`panel-${name}`);
+  if (!panel) return;
+
+  if (!panelOriginals[name]) {
+    panelOriginals[name] = panel.textContent;
+  }
+
+  cancelAnimationFrame(typingRaf);
+  const full   = panelOriginals[name];
+  const speed  = 8;
+  let   pos    = 0;
+  panel.textContent = "";
+
+  const tick = () => {
+    pos = Math.min(pos + speed, full.length);
+    panel.textContent = full.slice(0, pos);
+    if (pos < full.length) typingRaf = requestAnimationFrame(tick);
+  };
+  typingRaf = requestAnimationFrame(tick);
+}
+
 window.addEventListener("keydown", e => {
   if (!boot.classList.contains("hidden")) {
     if (e.key === "Enter") showBio();
     return;
   }
   if (!bio.classList.contains("hidden")) {
+    const input = document.getElementById("cmd-input");
+    if (document.activeElement === input) return;
     if (e.key === "ArrowRight")     nextTab(+1);
     else if (e.key === "ArrowLeft") nextTab(-1);
     else if (e.key === "Escape")    showBoot();
   }
 });
 
-terminal.addEventListener("click", () => terminal.focus());
+terminal.addEventListener("click", () => {
+  if (!bio.classList.contains("hidden")) {
+    document.getElementById("cmd-input")?.focus();
+  } else {
+    terminal.focus();
+  }
+});
 
 class TextScramble {
   constructor(el) {
@@ -234,6 +311,177 @@ function initGlitch() {
   })();
 }
 
+function initCommandInput() {
+  const input  = document.getElementById("cmd-input");
+  const output = document.getElementById("cmd-output");
+  if (!input || !output) return;
+
+  const history = [];
+  let histIdx   = -1;
+
+  const COMMANDS = {
+    help: () => `available commands:\n  whoami  clear  ls  pwd  date  uptime  ping  echo [text]  matrix  exit`,
+    whoami: () => `nodepec`,
+    ls: () => `profile.txt  about.md  skills.txt  projects.json  writeups/  links.txt`,
+    pwd: () => `/home/nodepec/bio`,
+    date: () => new Date().toString(),
+    uptime: () => formatUptime(Date.now() - startedAt),
+    clear: () => { output.textContent = ""; output.className = "cmd-output"; return null; },
+    exit: () => { setTimeout(showBoot, 150); return "closing session..."; },
+    matrix: () => { startMatrix(); return "initiating matrix rain... (any key to stop)"; },
+    ping: () => `PING nodepec.dev: 64 bytes from 127.0.0.1 ttl=64 time=0.042ms`,
+    echo: (args) => args.join(" ") || "",
+  };
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (histIdx < history.length - 1) { histIdx++; input.value = history[history.length - 1 - histIdx] || ""; }
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (histIdx > 0) { histIdx--; input.value = history[history.length - 1 - histIdx] || ""; }
+      else { histIdx = -1; input.value = ""; }
+      return;
+    }
+    if (e.key !== "Enter") return;
+
+    const raw   = input.value.trim();
+    input.value = "";
+    histIdx     = -1;
+    if (!raw) return;
+
+    history.push(raw);
+    const parts = raw.split(/\s+/);
+    const cmd   = parts[0].toLowerCase();
+    const args  = parts.slice(1);
+
+    output.className = "cmd-output";
+
+    if (COMMANDS[cmd]) {
+      const result = COMMANDS[cmd](args);
+      if (result !== null && result !== undefined) {
+        output.textContent = result;
+      }
+    } else {
+      output.className  = "cmd-output error";
+      output.textContent = `command not found: ${cmd} — type 'help'`;
+    }
+  });
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Escape") { showBoot(); }
+  });
+}
+
+let matrixRaf    = null;
+let matrixActive = false;
+
+function startMatrix() {
+  const canvas = document.getElementById("matrix-canvas");
+  if (!canvas) return;
+  const ctx     = canvas.getContext("2d");
+  const fs      = 14;
+  const chars   = "ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789ABCDEF";
+
+  matrixActive = true;
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  const cols   = Math.floor(canvas.width / fs);
+  const drops  = Array(cols).fill(1);
+
+  canvas.classList.add("visible");
+
+  const tick = () => {
+    if (!matrixActive) return;
+    ctx.fillStyle = "rgba(0,0,0,.08)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#28c840";
+    ctx.font      = `${fs}px monospace`;
+    for (let i = 0; i < drops.length; i++) {
+      const ch = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(ch, i * fs, drops[i] * fs);
+      if (drops[i] * fs > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+    matrixRaf = requestAnimationFrame(tick);
+  };
+  tick();
+
+  const stop = () => {
+    stopMatrix();
+    window.removeEventListener("keydown", stop);
+    window.removeEventListener("click",   stop);
+  };
+  window.addEventListener("keydown", stop);
+  window.addEventListener("click",   stop);
+}
+
+function stopMatrix() {
+  matrixActive = false;
+  cancelAnimationFrame(matrixRaf);
+  const canvas = document.getElementById("matrix-canvas");
+  if (!canvas) return;
+  canvas.classList.remove("visible");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function initKonami() {
+  const SEQ  = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  let   pos  = 0;
+
+  const EGG_ART = `
+ █████╗  ██████╗ ██████╗███████╗███████╗███████╗
+██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝
+███████║██║     ██║     █████╗  ███████╗███████╗
+██╔══██║██║     ██║     ██╔══╝  ╚════██║╚════██║
+██║  ██║╚██████╗╚██████╗███████╗███████║███████║
+╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝╚══════╝
+
+         [ ACCESS GRANTED ]
+         nodepec@l33t.ing
+    you found the easter egg gg
+  `;
+
+  window.addEventListener("keydown", e => {
+    if (e.key === SEQ[pos]) {
+      pos++;
+      if (pos === SEQ.length) {
+        pos = 0;
+        triggerEasterEgg(EGG_ART);
+      }
+    } else {
+      pos = e.key === SEQ[0] ? 1 : 0;
+    }
+  });
+}
+
+function triggerEasterEgg(art) {
+  const overlay = document.getElementById("easter-egg");
+  const text    = document.getElementById("easter-text");
+  if (!overlay || !text) return;
+  text.textContent = art;
+  overlay.classList.remove("hidden");
+  const dismiss = () => {
+    overlay.classList.add("hidden");
+    window.removeEventListener("keydown", dismiss);
+    overlay.removeEventListener("click",  dismiss);
+  };
+  window.addEventListener("keydown", dismiss);
+  overlay.addEventListener("click",  dismiss);
+}
+
+function initVisibility() {
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopMatrix();
+    }
+  });
+}
+
 function initParticles() {
   const CFG = {
     count: 120, size: 2, speed: 0.35, lifetime: 220,
@@ -261,6 +509,9 @@ function initParticles() {
 
   const ctx = canvas.getContext("2d");
   let termRect = { left: 0, top: 0, right: 0, bottom: 0 };
+  let paused   = false;
+
+  document.addEventListener("visibilitychange", () => { paused = document.hidden; });
 
   function resize() {
     canvas.width  = canvas.offsetWidth;
@@ -323,6 +574,7 @@ function initParticles() {
 
   (function tick() {
     requestAnimationFrame(tick);
+    if (paused) return;
     frameCount++;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const w = canvas.width, h = canvas.height;
@@ -377,7 +629,17 @@ function initParticles() {
   })();
 }
 
+function initServiceWorker() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }
+}
+
 fillBoot();
 setActivePage("profile");
 initGlitch();
 initParticles();
+initCommandInput();
+initKonami();
+initVisibility();
+initServiceWorker();
