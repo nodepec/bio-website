@@ -4,81 +4,341 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Terminal bio page template." />
+  <meta name="description" content="nodepec — terminal bio" />
   <title>session://bio</title>
   <link rel="icon" href="web.ico" />
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    :root {
+      --bg:        #060809;
+      --surface:   rgba(255,255,255,.03);
+      --border:    rgba(255,255,255,.10);
+      --border-hi: rgba(255,255,255,.20);
+      --text:      #e2e2e2;
+      --dim:       rgba(226,226,226,.55);
+      --accent:    #4fffb0;
+      --radius:    13px;
+      --mono:      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --shadow:    0 32px 100px rgba(0,0,0,.7);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; }
+
+    body {
+      background: radial-gradient(ellipse 120% 80% at 50% 0%, #0b1117 0%, #060809 55%, #020304 100%);
+      color: var(--text);
+      font-family: var(--mono);
+      overflow: hidden;
+    }
+
+    .stage {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 32px 16px;
+      position: relative;
+    }
+
+    /* particles canvas */
+    .particles-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      image-rendering: pixelated;
+    }
+
+    /* terminal shell */
+    .terminal-shell {
+      position: relative;
+      z-index: 1;
+      width: min(900px, 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(160deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.015) 100%);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
+      overflow: hidden;
+    }
+
+    /* titlebar */
+    .titlebar {
+      height: 48px;
+      display: grid;
+      grid-template-columns: 100px 1fr 100px;
+      align-items: center;
+      padding: 0 14px;
+      background: rgba(0,0,0,.25);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(4px);
+    }
+
+    .dots { display: flex; gap: 8px; align-items: center; }
+    .dot  { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+
+    .title-text {
+      text-align: center;
+      font-size: 12px;
+      color: var(--dim);
+      letter-spacing: .04em;
+    }
+
+    /* body area */
+    .terminal-body {
+      position: relative;
+      height: min(600px, 76vh);
+      overflow: hidden;
+      outline: none;
+    }
+
+    /* scanlines */
+    .terminal-body::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 3px,
+        rgba(255,255,255,.012) 3px, rgba(255,255,255,.012) 4px
+      );
+      mix-blend-mode: overlay;
+    }
+
+    /* screen panels */
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(6px);
+    }
+
+    /* boot */
+    .boot-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .ascii-art {
+      font-size: 13px;
+      line-height: 1.15;
+      white-space: pre;
+      text-align: center;
+      color: rgba(226,226,226,.85);
+      user-select: none;
+      filter: drop-shadow(0 0 18px rgba(79,255,176,.12));
+    }
+
+    .boot-info {
+      font-size: 13.5px;
+      line-height: 1.7;
+      display: grid;
+      grid-template-columns: 8ch 1fr;
+      gap: 0 8px;
+    }
+
+    .boot-label { color: var(--dim); }
+    .boot-value { color: var(--text); }
+
+    .boot-loaded {
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: .05em;
+      margin-top: 4px;
+    }
+
+    .hint {
+      font-size: 12.5px;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* bio */
+    .bio-inner {
+      flex: 1;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .prompt-line {
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .p-host  { color: var(--accent); opacity: .85; }
+    .p-dim   { color: var(--dim); }
+    .p-path  { color: rgba(226,226,226,.65); }
+    .p-cmd   { color: var(--text); }
+
+    .tabs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 5px 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--dim);
+      cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+      letter-spacing: .02em;
+    }
+
+    .tab-btn:hover { color: var(--text); border-color: var(--border-hi); }
+    .tab-btn.active {
+      color: var(--accent);
+      border-color: rgba(79,255,176,.35);
+      background: rgba(79,255,176,.06);
+    }
+
+    .viewport {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0,0,0,.18);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      padding: 14px 16px;
+      overflow: auto;
+      opacity: 0;
+      transform: translateX(8px);
+      transition: opacity .2s ease, transform .2s ease;
+      pointer-events: none;
+    }
+
+    .page.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.2);
+      border-radius: 9px;
+      padding: 13px 15px;
+      color: rgba(226,226,226,.82);
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre;
+      font-family: var(--mono);
+      overflow: hidden;
+    }
+
+    .links-panel {
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.2);
+      border-radius: 9px;
+      padding: 13px 15px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .link-item {
+      color: rgba(226,226,226,.75);
+      text-decoration: none;
+      font-size: 13px;
+      border-bottom: 1px dashed var(--border);
+      width: fit-content;
+      padding-bottom: 1px;
+      transition: color .15s, border-color .15s;
+    }
+
+    .link-item:hover {
+      color: var(--accent);
+      border-bottom-color: rgba(79,255,176,.4);
+    }
+
+    .kbd-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--dim);
+    }
+
+    .footer-bar {
+      font-size: 12px;
+      color: var(--dim);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* key chip */
+    .key {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 7px;
+      border: 1px solid var(--border-hi);
+      border-bottom: 2px solid var(--border);
+      border-radius: 5px;
+      background: rgba(255,255,255,.04);
+      font-size: 11px;
+      color: var(--text);
+      font-family: var(--mono);
+    }
+
+    .dud { opacity: .45; color: var(--accent); }
+
+    .hidden-screen { display: none !important; }
+
+    @media (max-width: 520px) {
+      .screen { padding: 16px; }
+      .ascii-art { font-size: 11px; }
+    }
+  </style>
 </head>
 
 <body>
+<div id="root"></div>
 
-<main class="stage" aria-label="Terminal bio page">
-<section class="terminal" role="region" aria-label="Terminal window">
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
 
-  <header class="terminal-bar" aria-hidden="true">
-    <div class="dots">
-      <span class="dot red"></span>
-      <span class="dot yellow"></span>
-      <span class="dot green"></span>
-    </div>
-    <div class="title">session://bio</div>
-    <div></div>
-  </header>
+const HACKER_CAT = `     welcome!
+    /\\_/\\           ___
+   = o_o =_______    \\ \\ 
+    __^      __(  \\.__) )
+(@)<_____>__(_____)____/`;
 
-  <div class="terminal-body" id="terminal" tabindex="0">
+const TABS = ['profile','about','skills','projects','writeups','links'];
 
-    <!-- boot screen -->
-    <div class="boot" id="boot" aria-label="Boot screen">
-      <div class="boot-center">
-
-        <pre class="ascii mono" id="ascii-logo" aria-hidden="true"></pre>
-
-        <div class="boot-info mono" id="boot-lines" aria-live="polite">
-          <div><span class="label">IP:</span>     <span id="bio-ip">loading…</span></div>
-          <div><span class="label">System:</span> <span id="bio-system">loading…</span></div>
-          <div><span class="label">Uptime:</span> <span id="bio-uptime">loading…</span></div>
-          <div class="spacer"></div>
-          <div>Bio Loaded</div>
-        </div>
-
-        <div class="hint mono">
-          <span class="dim">Press</span>
-          <span class="key">Enter</span>
-          <span class="dim">to continue</span>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- bio screen -->
-    <div class="bio hidden mono" id="bio" aria-label="Bio screen">
-
-      <div class="bio-top">
-        <div class="prompt-line">
-          <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio</span><span class="dim">$</span>
-          <span class="cmd">open --tabs</span>
-        </div>
-
-        <div class="tabs" role="tablist" aria-label="Bio pages">
-          <button class="tab active" role="tab" aria-selected="true"  data-page="profile" >profile</button>
-          <button class="tab"        role="tab" aria-selected="false" data-page="about"   >about</button>
-          <button class="tab"        role="tab" aria-selected="false" data-page="skills"  >skills</button>
-          <button class="tab"        role="tab" aria-selected="false" data-page="projects">projects</button>
-          <button class="tab"        role="tab" aria-selected="false" data-page="writeups">writeups</button>
-          <button class="tab"        role="tab" aria-selected="false" data-page="links"   >links</button>
-        </div>
-      </div>
-
-      <div class="viewport" aria-label="Content viewport">
-
-        <!-- profile tab -->
-        <section class="page active" id="page-profile" data-page="profile" role="tabpanel">
-          <div class="prompt-line">
-            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio</span><span class="dim">$</span>
-            <span class="cmd">cat profile.txt</span>
-          </div>
-          <pre class="panel">
-Name:       [REDACTED]
+const CONTENT = {
+  profile: `Name:       [REDACTED]
 Handle:     @nodepec
 Focus:      CTF / web / cyber security
 Location:   Perth, AU
@@ -87,40 +347,17 @@ Status:     learning + building
 Notes:
 - I participate in ctf events every now and then
 - I keep solutions to the main challenges
-- I dont like boring stuff 🥀
-          </pre>
-          <div class="kbd-hint">
-            <span class="dim">Tip:</span> use
-            <span class="key">←</span>/<span class="key">→</span>
-            to switch tabs
-          </div>
-        </section>
+- I dont like boring stuff 🥀`,
 
-        <!-- about tab -->
-        <section class="page" id="page-about" data-page="about" role="tabpanel">
-          <div class="prompt-line">
-            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/about</span><span class="dim">$</span>
-            <span class="cmd">cat about.md</span>
-          </div>
-          <pre class="panel">
-I like difficult challenges that make me think
+  about: `I like difficult challenges that make me think
 small hypotheses → quick tests → record → refine
 
 I'm most interested in:
 - web apps
 - cryptography
-- open source intelligence
-          </pre>
-        </section>
+- open source intelligence`,
 
-        <!-- skills tab -->
-        <section class="page" id="page-skills" data-page="skills" role="tabpanel">
-          <div class="prompt-line">
-            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/skills</span><span class="dim">$</span>
-            <span class="cmd">cat skills.txt</span>
-          </div>
-          <pre class="panel">
-Coding:
+  skills: `Coding:
 - JavaScript, Python, Html, Css
 
 CTF / security:
@@ -128,65 +365,568 @@ CTF / security:
 - writeups: assumptions → tests → evidence → lesson
 
 Tools:
-- Burp (learning), Wireshark (also learning), Ghidra (ultra noob)
-          </pre>
-        </section>
+- Burp (learning), Wireshark (also learning), Ghidra (ultra noob)`,
 
-        <!-- projects tab -->
-        <section class="page" id="page-projects" data-page="projects" role="tabpanel">
-          <div class="prompt-line">
-            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/projects</span><span class="dim">$</span>
-            <span class="cmd">cat projects.json</span>
-          </div>
-          <pre class="panel">
-https://nodepec.github.io/The-Challenges/
+  projects: `https://nodepec.github.io/The-Challenges/
 
-This is my self made ctf challenges that use ai to adapt my encryption methods into an interactive story that
-makes you feel like it is something meaningful
-          </pre>
-        </section>
+This is my self made ctf challenges that use ai to adapt my
+encryption methods into an interactive story that makes you
+feel like it is something meaningful`,
 
-        <!-- writeups tab -->
-        <section class="page" id="page-writeups" data-page="writeups" role="tabpanel">
-          <div class="prompt-line">
-            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/writeups</span><span class="dim">$</span>
-            <span class="cmd">tail -n 3 latest.log</span>
-          </div>
-          <pre class="panel">
+  writeups: `[placeholder] lorem ipsum dolor sit amet
 [placeholder] lorem ipsum dolor sit amet
-[placeholder] lorem ipsum dolor sit amet
-[placeholder] lorem ipsum dolor sit amet
-          </pre>
-        </section>
+[placeholder] lorem ipsum dolor sit amet`,
+};
 
-        <!-- links tab -->
-        <section class="page" id="page-links" data-page="links" role="tabpanel">
-          <div class="prompt-line">
-            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/links</span><span class="dim">$</span>
-            <span class="cmd">cat links.txt</span>
-          </div>
-          <div class="panel links">
-            <a class="link" href="https://github.com/nodepec"      target="_blank" rel="noreferrer">github://nodepec</a>
-            <a class="link" href="https://ctftime.org/team/402033" target="_blank" rel="noreferrer">ctftime://team</a>
-          </div>
-        </section>
+const LINKS = [
+  { href: 'https://github.com/nodepec',        label: 'github://nodepec' },
+  { href: 'https://ctftime.org/team/402033',   label: 'ctftime://team'   },
+];
 
-      </div>
+// ── TextScramble ──────────────────────────────────────────────────────────────
+const SCRAMBLE_CHARS = '!<>-_\\/[]{}—=+*^?#________';
 
-      <div class="footer-line">
-        <span class="dim">Keys:</span>
-        <span class="key">←</span>/<span class="key">→</span> tabs •
-        <span class="key">Esc</span> back to boot
-      </div>
+function useScramble() {
+  const scramble = useCallback((el, finalText) => {
+    if (!el || el._scrambling) return;
+    const oldText = el.innerText || '';
+    const length  = Math.max(oldText.length, finalText.length);
+    const queue   = [];
+    for (let i = 0; i < length; i++) {
+      queue.push({
+        from:  oldText[i] || '',
+        to:    finalText[i] || '',
+        start: Math.floor(Math.random() * 40),
+        end:   Math.floor(Math.random() * 40) + Math.floor(Math.random() * 40),
+        char:  '',
+      });
+    }
+    el._scrambling = true;
+    let frame = 0;
+    let raf;
+    const update = () => {
+      let out = '', complete = 0;
+      for (let i = 0; i < queue.length; i++) {
+        const q = queue[i];
+        if (frame >= q.end) {
+          complete++;
+          out += q.to;
+        } else if (frame >= q.start) {
+          if (!q.char || Math.random() < 0.28) {
+            q.char = SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+          }
+          out += `<span class="dud">${q.char}</span>`;
+        } else {
+          out += q.from;
+        }
+      }
+      el.innerHTML = out;
+      if (complete === queue.length) {
+        el._scrambling = false;
+      } else {
+        frame++;
+        raf = requestAnimationFrame(update);
+      }
+    };
+    cancelAnimationFrame(raf);
+    update();
+  }, []);
+  return scramble;
+}
 
+// ── Particles ─────────────────────────────────────────────────────────────────
+function Particles({ terminalRef }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const CFG = {
+      count: 110, size: 2, speed: 0.35, lifetime: 220,
+      repelRadius: 90, repelForce: 0.18,
+      burstCount: 18, burstSpeed: 3.2,
+      color: '#ffffff', opacity: 0.5,
+    };
+    const r2  = CFG.repelRadius * CFG.repelRadius;
+    const PAD = 14;
+    let termRect = { left:0, top:0, right:0, bottom:0 };
+    let W = 0, H = 0;
+
+    function resize() {
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width  = W;
+      canvas.height = H;
+      if (terminalRef.current) {
+        const cr = canvas.getBoundingClientRect();
+        const tr = terminalRef.current.getBoundingClientRect();
+        termRect = {
+          left:   tr.left   - cr.left - PAD,
+          top:    tr.top    - cr.top  - PAD,
+          right:  tr.right  - cr.left + PAD,
+          bottom: tr.bottom - cr.top  + PAD,
+        };
+      }
+    }
+
+    const inT = (x, y) =>
+      x >= termRect.left && x <= termRect.right &&
+      y >= termRect.top  && y <= termRect.bottom;
+
+    function mkParticle(burst=false, bx=0, by=0) {
+      const a   = Math.random() * Math.PI * 2;
+      const spd = burst
+        ? CFG.burstSpeed * (0.5 + Math.random())
+        : CFG.speed * (0.4 + Math.random() * 0.8);
+      let x, y;
+      if (burst) { x = bx; y = by; }
+      else { do { x = Math.random()*W; y = Math.random()*H; } while (inT(x,y)); }
+      return {
+        x, y,
+        vx: Math.cos(a)*spd, vy: Math.sin(a)*spd,
+        phase: Math.random()*Math.PI*2,
+        life: burst ? 0 : Math.floor(Math.random()*CFG.lifetime),
+        maxLife: CFG.lifetime + Math.floor(Math.random()*80-40),
+        burst,
+      };
+    }
+
+    const particles = Array.from({length: CFG.count}, () => mkParticle());
+    const mouse = {x: -9999, y: -9999};
+    let fc = 0, rafId;
+
+    const onMove = e => {
+      const cr = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - cr.left;
+      mouse.y = e.clientY - cr.top;
+    };
+    const onLeave = () => { mouse.x = -9999; mouse.y = -9999; };
+    const onClick = e => {
+      const cr = canvas.getBoundingClientRect();
+      const x = e.clientX - cr.left, y = e.clientY - cr.top;
+      if (inT(x, y)) return;
+      for (let i = 0; i < CFG.burstCount; i++) particles.push(mkParticle(true, x, y));
+    };
+
+    window.addEventListener('mousemove', onMove, {passive:true});
+    window.addEventListener('mouseleave', onLeave, {passive:true});
+    window.addEventListener('click', onClick);
+    window.addEventListener('resize', resize, {passive:true});
+    resize();
+
+    const tick = () => {
+      rafId = requestAnimationFrame(tick);
+      fc++;
+      ctx.clearRect(0, 0, W, H);
+      for (let i = particles.length-1; i >= 0; i--) {
+        const p = particles[i];
+        p.life++;
+        let alpha;
+        if (p.life < 20)               alpha = (p.life/20)*CFG.opacity;
+        else if (p.life > p.maxLife-40) alpha = ((p.maxLife-p.life)/40)*CFG.opacity;
+        else                            alpha = CFG.opacity;
+        if (p.life >= p.maxLife) {
+          if (p.burst) { particles.splice(i,1); continue; }
+          Object.assign(p, mkParticle());
+          continue;
+        }
+        const dx=p.x-mouse.x, dy=p.y-mouse.y, d2=dx*dx+dy*dy;
+        if (d2 < r2 && d2 > 0) {
+          const d = Math.sqrt(d2), f = CFG.repelForce*(1-d/CFG.repelRadius);
+          p.vx += (dx/d)*f; p.vy += (dy/d)*f;
+        }
+        p.vx *= 0.97; p.vy *= 0.97;
+        if (!p.burst) {
+          p.vx += Math.sin(p.phase+fc*0.012)*0.008;
+          p.vy += Math.cos(p.phase+fc*0.009)*0.008;
+        }
+        p.x += p.vx; p.y += p.vy;
+        const buf=4;
+        if (p.x<-buf) p.x=W+buf; if (p.x>W+buf) p.x=-buf;
+        if (p.y<-buf) p.y=H+buf; if (p.y>H+buf) p.y=-buf;
+        if (inT(p.x, p.y)) continue;
+        ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+        ctx.fillStyle   = CFG.color;
+        ctx.fillRect(Math.round(p.x), Math.round(p.y), CFG.size, CFG.size);
+      }
+      while (particles.filter(p=>!p.burst).length < CFG.count) particles.push(mkParticle());
+      ctx.globalAlpha = 1;
+    };
+    tick();
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseleave', onLeave);
+      window.removeEventListener('click', onClick);
+      window.removeEventListener('resize', resize);
+    };
+  }, [terminalRef]);
+
+  return <canvas ref={canvasRef} className="particles-canvas" />;
+}
+
+// ── ScrambleText ──────────────────────────────────────────────────────────────
+function ScrambleText({ text, className, onHover }) {
+  const ref = useRef(null);
+  const scramble = useScramble();
+  const trigger = useCallback(() => scramble(ref.current, text), [scramble, text]);
+  useEffect(() => { if (onHover && ref.current) {} }, []);
+  return (
+    <span
+      ref={ref}
+      className={className}
+      onMouseEnter={onHover ? trigger : undefined}
+    >{text}</span>
+  );
+}
+
+// ── BootInfo ──────────────────────────────────────────────────────────────────
+function BootInfo({ label, id, value }) {
+  const ref  = useRef(null);
+  const prev = useRef('');
+  const scramble = useScramble();
+
+  useEffect(() => {
+    if (!ref.current) return;
+    if (value && value !== prev.current && value !== 'resolving…' && value !== 'loading…') {
+      prev.current = value;
+      ref.current.textContent = value;
+      scramble(ref.current, value);
+    } else if (ref.current.textContent !== value) {
+      ref.current.textContent = value;
+    }
+  }, [value, scramble]);
+
+  return (
+    <>
+      <span className="boot-label">{label}</span>
+      <span className="boot-value" ref={ref}>{value}</span>
+    </>
+  );
+}
+
+// ── PromptLine ────────────────────────────────────────────────────────────────
+function PromptLine({ path, cmd }) {
+  const hostRef = useRef(null);
+  const cmdRef  = useRef(null);
+  const scramble = useScramble();
+  useEffect(() => {
+    if (hostRef.current) scramble(hostRef.current, 'user@host');
+    if (cmdRef.current)  scramble(cmdRef.current, cmd);
+  }, [cmd]);
+  return (
+    <div className="prompt-line">
+      <span className="p-host" ref={hostRef}>user@host</span>
+      <span className="p-dim">:</span>
+      <span className="p-path">{path}</span>
+      <span className="p-dim">$ </span>
+      <span className="p-cmd" ref={cmdRef}>{cmd}</span>
     </div>
+  );
+}
 
-  </div>
-</section>
-</main>
+// ── Key chip ──────────────────────────────────────────────────────────────────
+function Key({ children }) {
+  const ref = useRef(null);
+  const scramble = useScramble();
+  return (
+    <kbd className="key" ref={ref} onMouseEnter={() => scramble(ref.current, String(children))}>
+      {children}
+    </kbd>
+  );
+}
 
-<script src="script.js"></script>
+// ── Boot screen ───────────────────────────────────────────────────────────────
+function BootScreen({ visible, onEnter, ip, system, uptime }) {
+  const enterRef = useRef(null);
+  const scramble = useScramble();
+
+  useEffect(() => {
+    if (!visible) return;
+    const handler = e => {
+      if (e.key === 'Enter') {
+        if (enterRef.current) scramble(enterRef.current, 'Enter');
+        setTimeout(onEnter, 120);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [visible, onEnter, scramble]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const ids = ['ip', 'system', 'uptime'];
+    const interval = setInterval(() => {
+      // periodic scramble handled by BootInfo via value changes
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [visible]);
+
+  return (
+    <div className={`screen${visible ? '' : ' hidden'}`}>
+      <div className="boot-inner">
+        <pre className="ascii-art">{HACKER_CAT}</pre>
+        <div className="boot-info">
+          <BootInfo label="IP:"     value={ip}     />
+          <BootInfo label="System:" value={system} />
+          <BootInfo label="Uptime:" value={uptime} />
+        </div>
+        <div className="boot-loaded">// Bio Loaded</div>
+        <div className="hint">
+          <span>Press</span>
+          <kbd
+            className="key"
+            ref={enterRef}
+            onMouseEnter={() => scramble(enterRef.current, 'Enter')}
+          >Enter</kbd>
+          <span>to continue</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Bio screen ────────────────────────────────────────────────────────────────
+function BioScreen({ visible, onEscape, activeTab, setActiveTab }) {
+  const scramble = useScramble();
+
+  useEffect(() => {
+    if (!visible) return;
+    const handler = e => {
+      if (e.key === 'Escape') onEscape();
+      else if (e.key === 'ArrowRight') setActiveTab(t => TABS[(TABS.indexOf(t)+1) % TABS.length]);
+      else if (e.key === 'ArrowLeft')  setActiveTab(t => TABS[(TABS.indexOf(t)-1+TABS.length) % TABS.length]);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [visible, onEscape, setActiveTab]);
+
+  const CMD_MAP = {
+    profile: 'cat profile.txt',
+    about:   'cat about.md',
+    skills:  'cat skills.txt',
+    projects:'cat projects.json',
+    writeups:'tail -n 3 latest.log',
+    links:   'cat links.txt',
+  };
+
+  const PATH_MAP = {
+    profile: '~/bio',
+    about:   '~/bio/about',
+    skills:  '~/bio/skills',
+    projects:'~/bio/projects',
+    writeups:'~/bio/writeups',
+    links:   '~/bio/links',
+  };
+
+  return (
+    <div className={`screen${visible ? '' : ' hidden'}`}>
+      <div className="bio-inner">
+
+        <PromptLine path="~/bio" cmd="open --tabs" />
+
+        <div className="tabs-row" role="tablist">
+          {TABS.map(t => (
+            <button
+              key={t}
+              className={`tab-btn${activeTab === t ? ' active' : ''}`}
+              role="tab"
+              aria-selected={activeTab === t}
+              onClick={() => setActiveTab(t)}
+              onMouseEnter={e => scramble(e.currentTarget, t)}
+            >{t}</button>
+          ))}
+        </div>
+
+        <div className="viewport">
+          {TABS.map(t => (
+            <div key={t} className={`page${activeTab === t ? ' active' : ''}`} role="tabpanel">
+              <PromptLine path={PATH_MAP[t]} cmd={CMD_MAP[t]} />
+              {t === 'links' ? (
+                <div className="links-panel">
+                  {LINKS.map(l => (
+                    <a
+                      key={l.href}
+                      className="link-item"
+                      href={l.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      onMouseEnter={e => scramble(e.currentTarget, l.label)}
+                    >{l.label}</a>
+                  ))}
+                </div>
+              ) : (
+                <pre className="panel">{CONTENT[t]}</pre>
+              )}
+              {t === 'profile' && (
+                <div className="kbd-hint">
+                  <span style={{color:'var(--dim)'}}>Tip: use </span>
+                  <Key>←</Key><span style={{color:'var(--dim)'}}>/</span><Key>→</Key>
+                  <span style={{color:'var(--dim)'}}> to switch tabs</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="footer-bar">
+          <span style={{color:'var(--dim)'}}>keys:</span>
+          <Key>←</Key><span style={{color:'var(--dim)'}}>/</span><Key>→</Key>
+          <span style={{color:'var(--dim)'}}>tabs •</span>
+          <Key>Esc</Key>
+          <span style={{color:'var(--dim)'}}>boot</span>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+function App() {
+  const [screen,    setScreen]    = useState('boot');
+  const [activeTab, setActiveTab] = useState('profile');
+  const [ip,        setIp]        = useState('resolving…');
+  const [system,    setSystem]    = useState('loading…');
+  const [uptime,    setUptime]    = useState('0m');
+  const terminalRef = useRef(null);
+  const startedAt   = useRef(Date.now());
+
+  function formatUptime(ms) {
+    const m = Math.floor(ms/60000), h = Math.floor(m/60);
+    return h > 0 ? `${h}h ${m%60}m` : `${m}m`;
+  }
+
+  async function detectClient() {
+    const ua = navigator.userAgent || '';
+    let os = 'unknown';
+    if (navigator.userAgentData?.getHighEntropyValues) {
+      try {
+        const { platform, platformVersion } = await navigator.userAgentData.getHighEntropyValues(['platform','platformVersion']);
+        if (platform === 'Windows')      os = parseInt(platformVersion,10) >= 13 ? 'Windows 11' : 'Windows 10';
+        else if (platform === 'macOS')   os = 'macOS';
+        else if (platform === 'Android') os = 'Android';
+        else if (platform === 'iOS')     os = 'iOS';
+        else if (platform === 'Linux')   os = 'Linux';
+      } catch {}
+    }
+    if (os === 'unknown') {
+      if (/Windows NT/.test(ua))            os = 'Windows';
+      else if (/Mac OS X/.test(ua))         os = 'macOS';
+      else if (/Android/.test(ua))          os = 'Android';
+      else if (/iPhone|iPad|iPod/.test(ua)) os = 'iOS';
+      else if (/Linux/.test(ua))            os = 'Linux';
+    }
+    let browser = 'unknown';
+    if (/Edg\//.test(ua))                                  browser = 'Edge';
+    else if (/Chrome\//.test(ua))                          browser = 'Chrome';
+    else if (/Firefox\//.test(ua))                         browser = 'Firefox';
+    else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = 'Safari';
+    return os === 'unknown' ? browser : `${os} (${browser})`;
+  }
+
+  useEffect(() => {
+    (async () => {
+      const [resolvedIp, resolvedSystem] = await Promise.all([
+        fetch('https://api.ipify.org?format=json', {cache:'no-store'})
+          .then(r => r.json()).then(d => d.ip || 'unknown').catch(() => 'unknown'),
+        detectClient(),
+      ]);
+      setIp(resolvedIp);
+      setSystem(resolvedSystem);
+      setUptime(formatUptime(Date.now() - startedAt.current));
+    })();
+    const iv = setInterval(() => setUptime(formatUptime(Date.now() - startedAt.current)), 30000);
+    return () => clearInterval(iv);
+  }, []);
+
+  // random periodic scramble on bio screen
+  useEffect(() => {
+    if (screen !== 'bio') return;
+    const scrambleChars = '!<>-_\\/[]{}—=+*^?#________';
+    const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+    let t;
+    const schedule = () => {
+      t = setTimeout(() => {
+        const els = document.querySelectorAll('.page.active .p-host, .page.active .p-cmd, .page.active .p-path, .title-text');
+        const pool = Array.from(els).filter(e => !e._scrambling);
+        if (pool.length) {
+          const el = pool[rand(0, pool.length-1)];
+          const final = el.innerText;
+          if (!final.trim() || el._scrambling) { schedule(); return; }
+          el._scrambling = true;
+          const oldText = el.innerText, length = Math.max(oldText.length, final.length);
+          const queue = [];
+          for (let i=0;i<length;i++) {
+            queue.push({from:oldText[i]||'',to:final[i]||'',start:Math.floor(Math.random()*40),end:Math.floor(Math.random()*40)+Math.floor(Math.random()*40),char:''});
+          }
+          let frame=0, raf;
+          const upd = () => {
+            let out='',complete=0;
+            for (let i=0;i<queue.length;i++) {
+              const q=queue[i];
+              if(frame>=q.end){complete++;out+=q.to;}
+              else if(frame>=q.start){if(!q.char||Math.random()<0.28)q.char=scrambleChars[Math.floor(Math.random()*scrambleChars.length)];out+=`<span class="dud">${q.char}</span>`;}
+              else out+=q.from;
+            }
+            el.innerHTML=out;
+            if(complete===queue.length){el._scrambling=false;el.innerHTML=final;}
+            else{frame++;raf=requestAnimationFrame(upd);}
+          };
+          upd();
+        }
+        schedule();
+      }, rand(5000, 7000));
+    };
+    schedule();
+    return () => clearTimeout(t);
+  }, [screen]);
+
+  return (
+    <div className="stage" onClick={e => { if (screen === 'bio') e.currentTarget.querySelector('.terminal-body')?.focus(); }}>
+      <Particles terminalRef={terminalRef} />
+
+      <div className="terminal-shell" ref={terminalRef}>
+        <div className="titlebar">
+          <div className="dots">
+            <div className="dot dot-r" />
+            <div className="dot dot-y" />
+            <div className="dot dot-g" />
+          </div>
+          <div className="title-text">session://bio</div>
+          <div />
+        </div>
+
+        <div
+          className="terminal-body"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (screen === 'boot' && e.key === 'Enter') setScreen('bio');
+          }}
+        >
+          <BootScreen
+            visible={screen === 'boot'}
+            onEnter={() => setScreen('bio')}
+            ip={ip}
+            system={system}
+            uptime={uptime}
+          />
+          <BioScreen
+            visible={screen === 'bio'}
+            onEscape={() => setScreen('boot')}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 
 </body>
-
 </html>
