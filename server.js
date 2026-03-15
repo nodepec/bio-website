@@ -2,15 +2,20 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PUB  = path.join(__dirname, "public");
+const PORT = process.env.PORT || 3000;
+const DEV  = process.env.NODE_ENV === "development";
 
 const app = express();
-const PUB = path.join(__dirname, "public");
 
 app.use(express.static(PUB, { extensions: ["html"] }));
 
-app.get("*", (req, res) => res.sendFile(path.join(PUB, "index.html")));
+app.use((req, res) => {
+  if (DEV) console.warn(`404 ${req.method} ${req.url}`);
+  res.status(404).sendFile(path.join(PUB, "index.html"));
+});
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`▶ Listening on http://localhost:${port}`));
+app.listen(PORT, () => {
+  console.log(`listening on http://localhost:${PORT}${DEV ? " (dev)" : ""}`);
+});
