@@ -61,16 +61,16 @@ async function detectClient() {
     else if (/Linux/.test(ua))            os = "Linux";
   }
   let browser = "unknown";
-  if (/Edg\//.test(ua))                                  browser = "Edge";
-  else if (/Chrome\//.test(ua))                          browser = "Chrome";
-  else if (/Firefox\//.test(ua))                         browser = "Firefox";
-  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = "Safari";
+  if (/Edg\
+  else if (/Chrome\
+  else if (/Firefox\
+  else if (/Safari\
   return os === "unknown" ? browser : `${os} (${browser})`;
 }
 
 async function getPublicIP() {
   try {
-    const res = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
+    const res = await fetch("https:
     if (!res.ok) throw new Error();
     const { ip } = await res.json();
     return ip || "unknown";
@@ -85,10 +85,10 @@ async function fillBoot() {
   const container = document.getElementById("boot-lines");
   const hint      = document.getElementById("boot-hint");
 
-  function addLine(html, delay) {
+  function addLine(html, delay, extraClass) {
     return sleep(delay).then(() => {
       const div = document.createElement("div");
-      div.className = "boot-line";
+      div.className = "boot-line" + (extraClass ? " " + extraClass : "");
       div.innerHTML = html;
       container.appendChild(div);
       requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add("show")));
@@ -105,11 +105,8 @@ async function fillBoot() {
   await addLine(`<span class="ok">[OK]</span> <span class="label">sys</span> <span id="bio-system">${system}</span>`, 160);
   await addLine(`<span class="ok">[OK]</span> <span class="label">uptime</span> <span id="bio-uptime">${formatUptime(Date.now() - startedAt)}</span>`, 120);
 
-  const spacer = document.createElement("div");
-  spacer.className = "boot-info spacer";
-  container.appendChild(spacer);
-
-  await addLine('<span style="color:rgba(233,233,233,.9)">Bio Loaded</span>', 200);
+  await sleep(220);
+  await addLine('<span style="color:rgba(233,233,233,.9)">Bio Loaded</span>', 0, 'bio-loaded');
 
   await sleep(300);
   hint.style.display = "";
@@ -415,8 +412,10 @@ function startMatrix() {
     window.removeEventListener("keydown", stop);
     window.removeEventListener("click",   stop);
   };
-  window.addEventListener("keydown", stop);
-  window.addEventListener("click",   stop);
+  setTimeout(() => {
+    window.addEventListener("keydown", stop);
+    window.addEventListener("click",   stop);
+  }, 200);
 }
 
 function stopMatrix() {
@@ -433,18 +432,16 @@ function initKonami() {
   const SEQ  = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
   let   pos  = 0;
 
-  const EGG_ART = `
- █████╗  ██████╗ ██████╗███████╗███████╗███████╗
+  const EGG_ART = ` █████╗  ██████╗ ██████╗███████╗███████╗███████╗
 ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝
 ███████║██║     ██║     █████╗  ███████╗███████╗
 ██╔══██║██║     ██║     ██╔══╝  ╚════██║╚════██║
 ██║  ██║╚██████╗╚██████╗███████╗███████║███████║
 ╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝╚══════╝╚══════╝
 
-         [ ACCESS GRANTED ]
-         nodepec@l33t.ing
-    you found the easter egg gg
-  `;
+      [ ACCESS GRANTED ]
+      nodepec@l33t.ing
+  you found the easter egg gg`;
 
   window.addEventListener("keydown", e => {
     if (e.key === SEQ[pos]) {
