@@ -56,7 +56,6 @@ body{
   user-select:none;
 }
 
-/* viewport container */
 .terminal-body{
   position: relative;
   padding: 0;
@@ -67,7 +66,6 @@ body{
   overflow: hidden;
 }
 
-/* overlays */
 .boot,
 .bio{
   position: absolute;
@@ -88,7 +86,6 @@ body{
   background: rgba(255,255,255,.05);
 }
 
-/* ---------------- Boot: centered, ASCII above text ---------------- */
 .boot{
   display: grid;
   place-items: center;
@@ -107,7 +104,7 @@ body{
   font-size: 14px;
   line-height: 1.12;
   white-space: pre;
-  text-align: center;              /* centers the ASCII */
+  text-align: center;
   color: rgba(233,233,233,.88);
   user-select: none;
   filter: drop-shadow(0 10px 25px rgba(0,0,0,.35));
@@ -135,7 +132,6 @@ body{
   text-align: center;
 }
 
-/* ---------------- Bio ---------------- */
 .bio{
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -235,7 +231,8 @@ body{
   font-size: 12.5px;
 }
 
-/* CRT overlay */
+.dud{ opacity: 0.5; }
+
 @media (prefers-reduced-motion: no-preference){
   .terminal-body::after{
     content:"";
