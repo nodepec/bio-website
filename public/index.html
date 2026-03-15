@@ -27,6 +27,7 @@
 
   <div class="terminal-body" id="terminal" tabindex="0">
 
+    
     <div class="boot" id="boot" aria-label="Boot screen">
       <div class="boot-center">
 
@@ -43,6 +44,7 @@
       </div>
     </div>
 
+    
     <div class="bio hidden mono" id="bio" aria-label="Bio screen">
 
       <div class="bio-top">
@@ -63,6 +65,7 @@
 
       <div class="viewport" aria-label="Content viewport">
 
+        
         <section class="page active" id="page-profile" data-page="profile" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio</span><span class="dim">$</span>
@@ -80,13 +83,9 @@ Notes:
 - I keep solutions to the main challenges
 - I dont like boring stuff &#x1F940;
           </pre>
-          <div class="kbd-hint">
-            <span class="dim">Tip:</span> use
-            <span class="key">&#8592;</span>/<span class="key">&#8594;</span>
-            to switch tabs &bull; type a command below
-          </div>
         </section>
 
+        
         <section class="page" id="page-about" data-page="about" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/about</span><span class="dim">$</span>
@@ -103,6 +102,7 @@ I'm most interested in:
           </pre>
         </section>
 
+        
         <section class="page" id="page-skills" data-page="skills" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/skills</span><span class="dim">$</span>
@@ -121,6 +121,7 @@ Tools:
           </pre>
         </section>
 
+        
         <section class="page" id="page-projects" data-page="projects" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/projects</span><span class="dim">$</span>
@@ -134,6 +135,7 @@ makes you feel like it is something meaningful
           </pre>
         </section>
 
+        
         <section class="page" id="page-writeups" data-page="writeups" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/writeups</span><span class="dim">$</span>
@@ -146,6 +148,7 @@ makes you feel like it is something meaningful
           </pre>
         </section>
 
+        
         <section class="page" id="page-links" data-page="links" role="tabpanel">
           <div class="prompt-line">
             <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/links</span><span class="dim">$</span>
@@ -159,23 +162,21 @@ makes you feel like it is something meaningful
 
       </div>
 
+      
       <div class="cmd-row" id="cmd-row">
         <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio</span><span class="dim">$&nbsp;</span>
         <input class="cmd-input" id="cmd-input" type="text" autocomplete="off" spellcheck="false" aria-label="Terminal command input" />
       </div>
 
+      
       <div class="cmd-output" id="cmd-output" aria-live="polite"></div>
-
-      <div class="footer-line">
-        <span class="dim">Keys:</span>
-        <span class="key">&#8592;</span>/<span class="key">&#8594;</span> tabs &#8226;
-        <span class="key">Esc</span> back to boot
-      </div>
 
     </div>
 
+    
     <canvas id="matrix-canvas" aria-hidden="true"></canvas>
 
+    
     <div class="easter-egg hidden" id="easter-egg" aria-live="assertive">
       <pre id="easter-text"></pre>
     </div>
