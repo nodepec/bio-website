@@ -378,21 +378,25 @@ let matrixActive = false;
 function startMatrix() {
   const canvas = document.getElementById("matrix-canvas");
   if (!canvas) return;
-  const ctx     = canvas.getContext("2d");
-  const fs      = 14;
-  const chars   = "ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789ABCDEF";
+  const ctx   = canvas.getContext("2d");
+  const fs    = 14;
+  const chars = "ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789ABCDEF";
 
-  matrixActive = true;
+  matrixActive  = true;
   canvas.width  = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
 
-  const cols   = Math.floor(canvas.width / fs);
-  const drops  = Array(cols).fill(1);
+  const cols  = Math.floor(canvas.width / fs);
+  const drops = Array(cols).fill(1);
+  let   mf    = 0;
 
   canvas.classList.add("visible");
 
   const tick = () => {
     if (!matrixActive) return;
+    matrixRaf = requestAnimationFrame(tick);
+    mf++;
+    if (mf % 4 !== 0) return;
     ctx.fillStyle = "rgba(0,0,0,.08)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#28c840";
@@ -403,7 +407,6 @@ function startMatrix() {
       if (drops[i] * fs > canvas.height && Math.random() > 0.975) drops[i] = 0;
       drops[i]++;
     }
-    matrixRaf = requestAnimationFrame(tick);
   };
   tick();
 
@@ -429,8 +432,8 @@ function stopMatrix() {
 }
 
 function initKonami() {
-  const SEQ  = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
-  let   pos  = 0;
+  const SEQ = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  let   pos = 0;
 
   const EGG_ART = ` █████╗  ██████╗ ██████╗███████╗███████╗███████╗
 ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝
@@ -446,10 +449,7 @@ function initKonami() {
   window.addEventListener("keydown", e => {
     if (e.key === SEQ[pos]) {
       pos++;
-      if (pos === SEQ.length) {
-        pos = 0;
-        triggerEasterEgg(EGG_ART);
-      }
+      if (pos === SEQ.length) { pos = 0; triggerEasterEgg(EGG_ART); }
     } else {
       pos = e.key === SEQ[0] ? 1 : 0;
     }
@@ -473,9 +473,7 @@ function triggerEasterEgg(art) {
 
 function initVisibility() {
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      stopMatrix();
-    }
+    if (document.hidden) stopMatrix();
   });
 }
 
