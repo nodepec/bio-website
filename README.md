@@ -5,8 +5,7 @@ this is a bio website made for fun and learning new coding skills and techniques
 
 ## Features
 
-- font awesome 6.5.2
-- html, css, javascript and express.js  
+- html, css, javascript
 
 
 ## Authors
