@@ -73,6 +73,7 @@ body{
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 2;
   background: repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.022) 0px,
@@ -91,13 +92,9 @@ body{
   width: 100%;
   height: 100%;
   padding: 26px 26px 18px;
-  transition: opacity .22s ease, transform .22s ease;
 }
 
-.hidden{
-  display: none !important;
-}
-
+.hidden{ display: none !important; }
 .dim{ color: var(--dim); }
 
 .key{
@@ -137,12 +134,36 @@ body{
   line-height: 1.55;
   color: rgba(233,233,233,.90);
   text-align: left;
+  min-height: 5em;
 }
 
-.boot-info .label{
+.boot-line{
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.boot-line.show{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.boot-line .label{
   display: inline-block;
   width: 7ch;
   color: rgba(233,233,233,.70);
+}
+
+.boot-line .ok{
+  color: #28c840;
+  margin-right: 4px;
+}
+
+.boot-line .fail{
+  color: #ff5f57;
+  margin-right: 4px;
 }
 
 .boot-info .spacer{ height: 8px; }
@@ -156,8 +177,8 @@ body{
 
 .bio{
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 12px;
+  grid-template-rows: auto 1fr auto auto auto;
+  gap: 8px;
 }
 
 .bio-top{
@@ -249,12 +270,83 @@ body{
   color: rgba(233,233,233,.70);
 }
 
+.cmd-row{
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  gap: 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding-top: 6px;
+}
+
+.cmd-input{
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  caret-color: #28c840;
+}
+
+.cmd-output{
+  font-size: 12.5px;
+  color: rgba(233,233,233,.75);
+  min-height: 0;
+  max-height: 3.5em;
+  overflow: hidden;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.cmd-output.error{ color: #ff5f57; }
+.cmd-output.success{ color: #28c840; }
+
 .footer-line{
   color: rgba(233,233,233,.70);
   font-size: 12.5px;
 }
 
 .dud{ opacity: 0.5; }
+
+#matrix-canvas{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+#matrix-canvas.visible{ opacity: 1; }
+
+.easter-egg{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: eg-in .3s ease;
+}
+
+@keyframes eg-in{
+  from{ opacity:0; transform:scale(.97); }
+  to{   opacity:1; transform:scale(1); }
+}
+
+.easter-egg pre{
+  color: #28c840;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  white-space: pre;
+  filter: drop-shadow(0 0 12px #28c840);
+}
 
 @media (prefers-reduced-motion: no-preference){
   .terminal-body::after{
