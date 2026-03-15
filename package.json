@@ -4,9 +4,14 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "NODE_ENV=development node server.js"
+    "dev": "NODE_ENV=development nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "compression": "^1.8.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
