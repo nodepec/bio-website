@@ -61,16 +61,16 @@ async function detectClient() {
     else if (/Linux/.test(ua))            os = "Linux";
   }
   let browser = "unknown";
-  if (/Edg\
-  else if (/Chrome\
-  else if (/Firefox\
-  else if (/Safari\
+  if (/Edg\//.test(ua))                                  browser = "Edge";
+  else if (/Chrome\//.test(ua))                          browser = "Chrome";
+  else if (/Firefox\//.test(ua))                         browser = "Firefox";
+  else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = "Safari";
   return os === "unknown" ? browser : `${os} (${browser})`;
 }
 
 async function getPublicIP() {
   try {
-    const res = await fetch("https:
+    const res = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
     if (!res.ok) throw new Error();
     const { ip } = await res.json();
     return ip || "unknown";
