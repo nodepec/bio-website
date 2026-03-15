@@ -405,7 +405,7 @@ function startMatrix() {
       const ch = chars[Math.floor(Math.random() * chars.length)];
       ctx.fillText(ch, i * fs, drops[i] * fs);
       if (drops[i] * fs > canvas.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
+      drops[i] += 0.4;
     }
   };
   tick();
