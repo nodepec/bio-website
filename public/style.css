@@ -105,6 +105,7 @@ body{
   background: rgba(255,255,255,.05);
 }
 
+/* boot */
 .boot{
   display: grid;
   place-items: center;
@@ -168,6 +169,8 @@ body{
 
 .boot-info .spacer{ height: 8px; }
 
+.boot-line.bio-loaded{ margin-top: 10px; }
+
 .hint{
   margin-top: 2px;
   color: rgba(233,233,233,.75);
@@ -175,9 +178,10 @@ body{
   text-align: center;
 }
 
+/* bio */
 .bio{
   display: grid;
-  grid-template-rows: auto 1fr auto auto auto;
+  grid-template-rows: auto 1fr auto auto;
   gap: 8px;
 }
 
@@ -270,6 +274,7 @@ body{
   color: rgba(233,233,233,.70);
 }
 
+/* command input row */
 .cmd-row{
   display: flex;
   align-items: center;
@@ -310,6 +315,7 @@ body{
 
 .dud{ opacity: 0.5; }
 
+/* matrix canvas */
 #matrix-canvas{
   position: absolute;
   inset: 0;
@@ -323,6 +329,7 @@ body{
 
 #matrix-canvas.visible{ opacity: 1; }
 
+/* easter egg */
 .easter-egg{
   position: absolute;
   inset: 0;
@@ -346,6 +353,7 @@ body{
   text-align: center;
   white-space: pre;
   filter: drop-shadow(0 0 12px #28c840);
+  margin: 0 auto;
 }
 
 @media (prefers-reduced-motion: no-preference){
