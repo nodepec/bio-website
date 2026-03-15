@@ -17,14 +17,13 @@
     position:       "fixed",
     inset:          "0",
     pointerEvents:  "none",
-    zIndex:         "-1",
+    zIndex:         "0",
     imageRendering: "pixelated",
   });
   document.body.prepend(canvas);
 
-  if (getComputedStyle(document.body).position === "static") {
-    document.body.style.position = "relative";
-  }
+  const terminal = document.getElementById("terminal");
+  if (terminal) terminal.style.zIndex = "1";
 
   const ctx = canvas.getContext("2d");
 
@@ -81,12 +80,10 @@
       p.life++;
 
       let alpha;
-      const fadeIn  = 20;
-      const fadeOut = 40;
-      if (p.life < fadeIn) {
-        alpha = (p.life / fadeIn) * CFG.opacity;
-      } else if (p.life > p.maxLife - fadeOut) {
-        alpha = ((p.maxLife - p.life) / fadeOut) * CFG.opacity;
+      if (p.life < 20) {
+        alpha = (p.life / 20) * CFG.opacity;
+      } else if (p.life > p.maxLife - 40) {
+        alpha = ((p.maxLife - p.life) / 40) * CFG.opacity;
       } else {
         alpha = CFG.opacity;
       }
