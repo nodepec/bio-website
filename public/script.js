@@ -388,12 +388,16 @@ function startMatrix() {
 
   const cols   = Math.floor(canvas.width / fs);
   const drops  = Array(cols).fill(1);
+  let   mFrame = 0;
 
   canvas.classList.add("visible");
 
   const tick = () => {
     if (!matrixActive) return;
-    ctx.fillStyle = "rgba(0,0,0,.08)";
+    matrixRaf = requestAnimationFrame(tick);
+    mFrame++;
+    if (mFrame % 3 !== 0) return;
+    ctx.fillStyle = "rgba(0,0,0,.18)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#28c840";
     ctx.font      = `${fs}px monospace`;
@@ -403,7 +407,6 @@ function startMatrix() {
       if (drops[i] * fs > canvas.height && Math.random() > 0.975) drops[i] = 0;
       drops[i]++;
     }
-    matrixRaf = requestAnimationFrame(tick);
   };
   tick();
 
