@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="nodepec — terminal bio" />
+  <meta name="description" content="Terminal bio page template." />
   <title>session://bio</title>
   <link rel="icon" href="web.ico" />
   <link rel="stylesheet" href="style.css" />
@@ -12,65 +12,177 @@
 
 <body>
 
-<main class="stage">
-  <canvas class="particles-canvas" id="particles"></canvas>
+<main class="stage" aria-label="Terminal bio page">
+<section class="terminal" role="region" aria-label="Terminal window">
 
-  <div class="terminal-shell" id="shell">
-    <div class="titlebar">
-      <div class="dots">
-        <div class="dot dot-r"></div>
-        <div class="dot dot-y"></div>
-        <div class="dot dot-g"></div>
+  <header class="terminal-bar" aria-hidden="true">
+    <div class="dots">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+    </div>
+    <div class="title" id="title">session://bio</div>
+    <div></div>
+  </header>
+
+  <div class="terminal-body" id="terminal" tabindex="0">
+
+    <!-- boot screen -->
+    <div class="boot" id="boot" aria-label="Boot screen">
+      <div class="boot-center">
+
+        <pre class="ascii mono" id="ascii-logo" aria-hidden="true"></pre>
+
+        <div class="boot-info mono" id="boot-lines" aria-live="polite">
+          <div><span class="label">IP:</span>     <span id="bio-ip">loading&#8230;</span></div>
+          <div><span class="label">System:</span> <span id="bio-system">loading&#8230;</span></div>
+          <div><span class="label">Uptime:</span> <span id="bio-uptime">loading&#8230;</span></div>
+          <div class="spacer"></div>
+          <div>Bio Loaded</div>
+        </div>
+
+        <div class="hint mono">
+          <span class="dim">Press</span>
+          <span class="key" id="enter-key">Enter</span>
+          <span class="dim">to continue</span>
+        </div>
+
       </div>
-      <div class="title-text" id="title-text">session://bio</div>
-      <div></div>
     </div>
 
-    <div class="terminal-body" id="terminal" tabindex="0">
+    <!-- bio screen -->
+    <div class="bio hidden mono" id="bio" aria-label="Bio screen">
 
-      <!-- boot screen -->
-      <div class="screen" id="boot-screen">
-        <div class="boot-inner">
-          <pre class="ascii-art" id="ascii-art"></pre>
-          <div class="boot-info">
-            <span class="boot-label">IP:</span>     <span class="boot-value" id="bv-ip">resolving...</span>
-            <span class="boot-label">System:</span> <span class="boot-value" id="bv-sys">loading...</span>
-            <span class="boot-label">Uptime:</span> <span class="boot-value" id="bv-up">0m</span>
-          </div>
-          <div class="boot-loaded">// Bio Loaded</div>
-          <div class="hint">
-            <span>Press</span>
-            <kbd class="key" id="enter-key">Enter</kbd>
-            <span>to continue</span>
-          </div>
+      <div class="bio-top">
+        <div class="prompt-line">
+          <span class="prompt" id="bio-host">user@host</span><span class="dim">:</span><span class="path">~/bio</span><span class="dim">$</span>
+          <span class="cmd">open --tabs</span>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Bio pages">
+          <button class="tab active" role="tab" aria-selected="true"  data-page="profile" >profile</button>
+          <button class="tab"        role="tab" aria-selected="false" data-page="about"   >about</button>
+          <button class="tab"        role="tab" aria-selected="false" data-page="skills"  >skills</button>
+          <button class="tab"        role="tab" aria-selected="false" data-page="projects">projects</button>
+          <button class="tab"        role="tab" aria-selected="false" data-page="writeups">writeups</button>
+          <button class="tab"        role="tab" aria-selected="false" data-page="links"   >links</button>
         </div>
       </div>
 
-      <!-- bio screen -->
-      <div class="screen screen-off" id="bio-screen">
-        <div class="bio-inner">
+      <div class="viewport" aria-label="Content viewport">
 
+        <!-- profile -->
+        <section class="page active" id="page-profile" data-page="profile" role="tabpanel">
           <div class="prompt-line">
-            <span class="p-host" id="bio-host">user@host</span><span class="p-dim">:</span><span class="p-path">~/bio</span><span class="p-dim">$ </span><span class="p-cmd">open --tabs</span>
+            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio</span><span class="dim">$</span>
+            <span class="cmd">cat profile.txt</span>
           </div>
+          <pre class="panel">
+Name:       [REDACTED]
+Handle:     @nodepec
+Focus:      CTF / web / cyber security
+Location:   Perth, AU
+Status:     learning + building
 
-          <div class="tabs-row" role="tablist" id="tabs-row"></div>
-
-          <div class="viewport" id="viewport"></div>
-
-          <div class="footer-bar">
-            <span>keys:</span>
-            <kbd class="key">&larr;</kbd><span>/</span><kbd class="key">&rarr;</kbd>
-            <span>tabs &bull;</span>
-            <kbd class="key">Esc</kbd>
-            <span>boot</span>
+Notes:
+- I participate in ctf events every now and then
+- I keep solutions to the main challenges
+- I dont like boring stuff &#x1F940;
+          </pre>
+          <div class="kbd-hint">
+            <span class="dim">Tip:</span> use
+            <span class="key">&#8592;</span>/<span class="key">&#8594;</span>
+            to switch tabs
           </div>
+        </section>
 
-        </div>
+        <!-- about -->
+        <section class="page" id="page-about" data-page="about" role="tabpanel">
+          <div class="prompt-line">
+            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/about</span><span class="dim">$</span>
+            <span class="cmd">cat about.md</span>
+          </div>
+          <pre class="panel">
+I like difficult challenges that make me think
+small hypotheses &#8594; quick tests &#8594; record &#8594; refine
+
+I'm most interested in:
+- web apps
+- cryptography
+- open source intelligence
+          </pre>
+        </section>
+
+        <!-- skills -->
+        <section class="page" id="page-skills" data-page="skills" role="tabpanel">
+          <div class="prompt-line">
+            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/skills</span><span class="dim">$</span>
+            <span class="cmd">cat skills.txt</span>
+          </div>
+          <pre class="panel">
+Coding:
+- JavaScript, Python, Html, Css
+
+CTF / security:
+- web fundamentals, auth flows, input handling mindset
+- writeups: assumptions &#8594; tests &#8594; evidence &#8594; lesson
+
+Tools:
+- Burp (learning), Wireshark (also learning), Ghidra (ultra noob)
+          </pre>
+        </section>
+
+        <!-- projects -->
+        <section class="page" id="page-projects" data-page="projects" role="tabpanel">
+          <div class="prompt-line">
+            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/projects</span><span class="dim">$</span>
+            <span class="cmd">cat projects.json</span>
+          </div>
+          <pre class="panel">
+https://nodepec.github.io/The-Challenges/
+
+This is my self made ctf challenges that use ai to adapt my encryption methods into an interactive story that
+makes you feel like it is something meaningful
+          </pre>
+        </section>
+
+        <!-- writeups -->
+        <section class="page" id="page-writeups" data-page="writeups" role="tabpanel">
+          <div class="prompt-line">
+            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/writeups</span><span class="dim">$</span>
+            <span class="cmd">tail -n 3 latest.log</span>
+          </div>
+          <pre class="panel">
+[placeholder] lorem ipsum dolor sit amet
+[placeholder] lorem ipsum dolor sit amet
+[placeholder] lorem ipsum dolor sit amet
+          </pre>
+        </section>
+
+        <!-- links -->
+        <section class="page" id="page-links" data-page="links" role="tabpanel">
+          <div class="prompt-line">
+            <span class="prompt">user@host</span><span class="dim">:</span><span class="path">~/bio/links</span><span class="dim">$</span>
+            <span class="cmd">cat links.txt</span>
+          </div>
+          <div class="panel links">
+            <a class="link" href="https://github.com/nodepec"      target="_blank" rel="noreferrer">github://nodepec</a>
+            <a class="link" href="https://ctftime.org/team/402033" target="_blank" rel="noreferrer">ctftime://team</a>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="footer-line">
+        <span class="dim">Keys:</span>
+        <span class="key">&#8592;</span>/<span class="key">&#8594;</span> tabs &#8226;
+        <span class="key">Esc</span> back to boot
       </div>
 
     </div>
+
   </div>
+</section>
 </main>
 
 <script src="script.js"></script>
