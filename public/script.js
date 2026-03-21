@@ -36,11 +36,11 @@ function startUptimeTick() {
 async function detectClient() {
   const ua = navigator.userAgent || "";
   let os = "unknown";
-  /** @type {NavigatorUAData|undefined} */
-  const uaData = /** @type {any} */ (navigator).userAgentData;
-  if (uaData?.getHighEntropyValues) {
+  // noinspection JSUnresolvedReference — Navigator UA Client Hints API (Chromium only)
+  const uaData = navigator["userAgentData"];
+  if (uaData && typeof uaData["getHighEntropyValues"] === "function") {
     try {
-      const { platform, platformVersion } = await uaData.getHighEntropyValues(["platform", "platformVersion"]);
+      const { platform, platformVersion } = await uaData["getHighEntropyValues"](["platform", "platformVersion"]);
       if (platform === "Windows")      os = parseInt(platformVersion, 10) >= 13 ? "Windows 11" : "Windows 10";
       else if (platform === "macOS")   os = "macOS";
       else if (platform === "Android") os = "Android";
