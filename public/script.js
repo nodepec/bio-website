@@ -1,9 +1,6 @@
 const terminal  = document.getElementById("terminal");
 const boot      = document.getElementById("boot");
 const bio       = document.getElementById("bio");
-const elIp      = document.getElementById("bio-ip");
-const elSystem  = document.getElementById("bio-system");
-const elUptime  = document.getElementById("bio-uptime");
 const asciiEl   = document.getElementById("ascii-logo");
 const tabs      = Array.from(document.querySelectorAll(".tab"));
 const pages     = Array.from(document.querySelectorAll(".page"));
@@ -16,10 +13,6 @@ const HACKER_CAT = String.raw`
     __^      __(  \.__) )
 (@)<_____>__(_____)____/
 `;
-
-function safeText(el, value) {
-  if (el) el.textContent = value ?? "unknown";
-}
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -43,9 +36,11 @@ function startUptimeTick() {
 async function detectClient() {
   const ua = navigator.userAgent || "";
   let os = "unknown";
-  if (navigator.userAgentData?.getHighEntropyValues) {
+  /** @type {NavigatorUAData|undefined} */
+  const uaData = /** @type {any} */ (navigator).userAgentData;
+  if (uaData?.getHighEntropyValues) {
     try {
-      const { platform, platformVersion } = await navigator.userAgentData.getHighEntropyValues(["platform", "platformVersion"]);
+      const { platform, platformVersion } = await uaData.getHighEntropyValues(["platform", "platformVersion"]);
       if (platform === "Windows")      os = parseInt(platformVersion, 10) >= 13 ? "Windows 11" : "Windows 10";
       else if (platform === "macOS")   os = "macOS";
       else if (platform === "Android") os = "Android";
@@ -71,7 +66,7 @@ async function detectClient() {
 async function getPublicIP() {
   try {
     const res = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
-    if (!res.ok) throw new Error();
+    if (!res.ok) return "unknown";
     const { ip } = await res.json();
     return ip || "unknown";
   } catch {
@@ -316,19 +311,34 @@ function initCommandInput() {
   const history = [];
   let histIdx   = -1;
 
-  const COMMANDS = {
-    help: () => `available commands:\n  whoami  clear  ls  pwd  date  uptime  ping  echo [text]  matrix  exit`,
-    whoami: () => `nodepec`,
-    ls: () => `profile.txt  about.md  skills.txt  projects.json  writeups/  links.txt`,
-    pwd: () => `/home/nodepec/bio`,
-    date: () => new Date().toString(),
-    uptime: () => formatUptime(Date.now() - startedAt),
-    clear: () => { output.textContent = ""; output.className = "cmd-output"; return null; },
-    exit: () => { setTimeout(showBoot, 150); return "closing session..."; },
-    matrix: () => { startMatrix(); return "initiating matrix rain... (any key to stop)"; },
-    ping: () => `PING nodepec.dev: 64 bytes from 127.0.0.1 ttl=64 time=0.042ms`,
-    echo: (args) => args.join(" ") || "",
-  };
+  function runHelp()   { return `available commands:\n  whoami  clear  ls  pwd  date  uptime  ping  echo [text]  matrix  exit`; }
+  function runWhoami() { return `nodepec`; }
+  function runLs()     { return `profile.txt  about.md  skills.txt  projects.json  writeups/  links.txt`; }
+  function runPwd()    { return `/home/nodepec/bio`; }
+  function runDate()   { return new Date().toString(); }
+  function runUptime() { return formatUptime(Date.now() - startedAt); }
+  function runClear()  { output.textContent = ""; output.className = "cmd-output"; return null; }
+  function runExit()   { setTimeout(showBoot, 150); return "closing session..."; }
+  function runMatrix() { startMatrix(); return "initiating matrix rain... (any key to stop)"; }
+  function runPing()   { return `PING nodepec.dev: 64 bytes from 127.0.0.1 ttl=64 time=0.042ms`; }
+  function runEcho(args) { return args.join(" ") || ""; }
+
+  function dispatch(cmd, args) {
+    switch (cmd) {
+      case "help":   return runHelp();
+      case "whoami": return runWhoami();
+      case "ls":     return runLs();
+      case "pwd":    return runPwd();
+      case "date":   return runDate();
+      case "uptime": return runUptime();
+      case "clear":  return runClear();
+      case "exit":   return runExit();
+      case "matrix": return runMatrix();
+      case "ping":   return runPing();
+      case "echo":   return runEcho(args);
+      default:       return undefined;
+    }
+  }
 
   input.addEventListener("keydown", e => {
     if (e.key === "ArrowUp") {
@@ -356,9 +366,9 @@ function initCommandInput() {
 
     output.className = "cmd-output";
 
-    if (COMMANDS[cmd]) {
-      const result = COMMANDS[cmd](args);
-      if (result !== null && result !== undefined) {
+    const result = dispatch(cmd, args);
+    if (result !== undefined) {
+      if (result !== null) {
         output.textContent = result;
       }
     } else {
@@ -630,7 +640,7 @@ function initServiceWorker() {
   }
 }
 
-fillBoot();
+fillBoot().catch(() => {});
 setActivePage("profile");
 initGlitch();
 initParticles();
