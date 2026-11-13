@@ -1,7 +1,7 @@
 
 # nodepec / session://bio
 
-A personal terminal portfolio for learning, building, and exploring CTF and web security. The original dark terminal, ASCII cat, six bio pages, Matrix effect, and Konami secret live on in a responsive, keyboard-accessible shell.
+A personal terminal portfolio for learning, building, and exploring
 
 ## Run locally
 
