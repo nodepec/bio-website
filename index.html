@@ -16,9 +16,29 @@
 
   <main class="terminal" aria-label="nodepec's terminal portfolio">
     <header class="window-bar">
-      <span class="window-title"><span class="window-indicator" aria-hidden="true"></span>session://bio</span>
+      <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-title">session://bio</span>
       <button class="icon-button" id="palette-trigger" aria-label="Open command palette" aria-keyshortcuts="Control+k Meta+k">commands <kbd>ctrl k</kbd></button>
     </header>
+
+    <section id="boot" class="boot-screen" aria-label="Boot screen" tabindex="-1" hidden>
+      <div class="boot-center">
+        <pre class="ascii boot-cat" aria-label="Welcoming ASCII cat">     welcome!
+    /\_/\           ___
+   = o_o =_______    \ \
+    __^      __(  \.__) )
+(@)&lt;_____&gt;__(_____)____/</pre>
+        <div class="boot-lines" id="boot-lines" aria-label="Session details">
+          <div class="boot-row"><span class="boot-ok">[OK]</span><span class="boot-label">init</span><span>system boot sequence</span></div>
+          <div class="boot-row"><span class="boot-ok">[OK]</span><span class="boot-label">load</span><span>bio modules</span></div>
+          <div class="boot-row"><span class="boot-ok">[OK]</span><span class="boot-label">net</span><span id="boot-network">checking…</span></div>
+          <div class="boot-row"><span class="boot-ok">[OK]</span><span class="boot-label">IP</span><span id="boot-ip">resolving…</span></div>
+          <div class="boot-row"><span class="boot-ok">[OK]</span><span class="boot-label">sys</span><span id="boot-system">detecting…</span></div>
+          <div class="boot-row"><span class="boot-ok">[OK]</span><span class="boot-label">uptime</span><span id="boot-uptime">0s</span></div>
+        </div>
+        <p class="boot-loaded" id="boot-title" role="status">Bio loaded.</p>
+        <button id="boot-enter" class="boot-enter">Press <kbd>Enter</kbd> to continue <span aria-hidden="true">↵</span></button>
+      </div>
+    </section>
 
     <div class="shell"><div class="editor">
       <nav class="tabs" role="tablist" aria-label="Bio pages">
@@ -106,9 +126,6 @@
   <footer class="desktop-footer"><span>© nodepec <span class="accent">/</span> personal site</span><a href="https://github.com/nodepec" target="_blank" rel="noopener noreferrer">github ↗</a></footer>
   <noscript><p class="noscript">All sections are readable without JavaScript. The shell needs JavaScript.</p></noscript>
   <dialog id="palette" class="palette" aria-labelledby="palette-title"><div class="palette-header"><label id="palette-title" for="palette-search"><span class="accent">›_</span> commands</label><button class="icon-button" id="palette-close" aria-label="Close command palette">esc</button></div><input id="palette-search" type="search" placeholder="page or command…" autocomplete="off" aria-label="Search pages and commands" aria-controls="palette-results" /><div id="palette-results" class="palette-results"></div><div class="palette-footer"><span>↑ ↓ move</span><span>↵ select</span><span>esc close</span></div></dialog>
-  <dialog id="boot" class="boot-dialog" aria-labelledby="boot-title"><div class="boot-top"><span>session://boot</span><button id="boot-close" class="small-button">skip ↵</button></div><pre class="ascii" aria-hidden="true"> /\_/\
-= o_o =
- &gt; ^ &lt;</pre><h2 id="boot-title">nodepec@localhost</h2><div id="boot-lines" class="boot-lines" role="status" aria-live="polite"></div><button class="primary-button" id="boot-enter">enter →</button></dialog>
   <div class="matrix-overlay" id="matrix-overlay" hidden><canvas id="matrix-canvas" aria-hidden="true"></canvas><button class="small-button" id="matrix-stop">exit · esc</button></div>
   <div class="toast" id="toast" role="status" hidden></div>
   <div class="update-notice" id="update-notice" hidden><span>update available.</span><button id="update-apply" class="small-button">reload</button><button id="update-dismiss" class="icon-button" aria-label="Dismiss update notice">×</button></div>

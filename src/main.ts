@@ -1,6 +1,7 @@
 import { commandDescriptions, complete, execute, formatUptime, isRoute, isTheme, routes, themes } from './commands.ts';
 import type { Route, Theme } from './commands.ts';
 import { createMatrix } from './effects.ts';
+import { describeClient, detectClient, sessionIP } from './client.ts';
 
 const $ = <T extends HTMLElement>(selector: string) => {
   const element = document.querySelector<T>(selector);
@@ -13,7 +14,7 @@ const log = $('#console-log');
 const palette = $<HTMLDialogElement>('#palette');
 const search = $<HTMLInputElement>('#palette-search');
 const results = $('#palette-results');
-const boot = $<HTMLDialogElement>('#boot');
+const boot = $('#boot');
 const startedAt = Date.now();
 const history: string[] = [];
 let historyIndex = 0;
@@ -23,6 +24,8 @@ let theme: Theme = 'blue';
 let effects = true;
 let toastTimeout: ReturnType<typeof setTimeout>;
 let bootTimers: ReturnType<typeof setTimeout>[] = [];
+let bootRequest: AbortController | undefined;
+let bootGeneration = 0;
 
 // Preferences remain local and the site still works when storage is blocked.
 function readPreference(key: string): string | null {
@@ -54,7 +57,6 @@ function setEffects(value: boolean) {
   root.dataset.motion = value ? 'on' : 'off';
   $('#motion-label').textContent = value ? 'on' : 'off';
   $('#motion-trigger').setAttribute('aria-pressed', String(value));
-  if (!value) matrix.stop();
   savePreference('effects', String(value));
 }
 
@@ -79,7 +81,20 @@ function navigate(next: Route, updateHash = true) {
   document.title = `nodepec — ${next} / session://bio`;
   if (updateHash && location.hash !== `#${next}`) window.history.pushState(null, '', `#${next}`);
   if (changed) $('#workspace').scrollTop = 0;
+  requestAnimationFrame(fitPage);
 }
+
+function fitPage() {
+  const workspace = $('#workspace');
+  const page = $(`#${route}`);
+  const available = workspace.clientHeight;
+  if (!available || !boot.hidden) return;
+  // The compact layout handles ordinary windows; scale only on unusually short screens.
+  page.style.setProperty('--page-scale', String(Math.min(1, available / Math.max(1, page.offsetHeight))));
+}
+const pageObserver = new ResizeObserver(() => requestAnimationFrame(fitPage));
+pageObserver.observe($('#workspace'));
+routes.forEach(name => pageObserver.observe($(`#${name}`)));
 
 function routeFromHash() {
   const value = location.hash.slice(1);
@@ -120,7 +135,7 @@ function run(raw: string) {
     case 'theme': setTheme(action.theme); break;
     case 'effects': setEffects(action.enabled); break;
     case 'boot': showBoot(); break;
-    case 'matrix': if (!matrix.start()) toast('Matrix is paused. Enable effects and turn off reduced motion to play it.'); break;
+    case 'matrix': if (!matrix.start()) toast('Canvas is unavailable in this browser.'); break;
   }
 }
 
@@ -180,33 +195,53 @@ $('#copy-handle').addEventListener('click', async () => {
   catch { toast('Copy this handle: @nodepec'); }
 });
 
-function closeBoot() { boot.close(); }
+function closeBoot() {
+  bootGeneration++;
+  bootRequest?.abort();
+  bootTimers.forEach(clearTimeout);
+  boot.hidden = true;
+  $('.terminal').classList.remove('booting');
+  input.focus({ preventScroll: true });
+  requestAnimationFrame(fitPage);
+}
 function showBoot() {
   matrix.stop();
   if (palette.open) palette.close();
-  if (boot.open) return;
+  if (!boot.hidden) return;
+  const generation = ++bootGeneration;
+  bootRequest?.abort();
+  bootRequest = new AbortController();
+  const request = bootRequest;
   bootTimers.forEach(clearTimeout);
-  const lines = $('#boot-lines');
-  lines.replaceChildren();
-  boot.showModal();
-  const messages = ['session://bio', 'mounting ~/nodepec', 'loading profile + projects', 'shell ready', 'welcome back.'];
+  boot.hidden = false;
+  $('.terminal').classList.add('booting');
+  boot.focus({ preventScroll: true });
+  $('#boot-ip').textContent = navigator.onLine ? 'resolving…' : 'unavailable (offline)';
+  $('#boot-system').textContent = describeClient(navigator.userAgent);
+  updateStatus();
   const reduced = !effects || matchMedia('(prefers-reduced-motion: reduce)').matches;
-  bootTimers = messages.map((message, index) => setTimeout(() => {
-    const line = document.createElement('p');
-    line.textContent = message;
-    lines.append(line);
-  }, reduced ? 0 : index * 190));
+  bootTimers = [...document.querySelectorAll<HTMLElement>('.boot-row')].map((row, index) => {
+    row.classList.remove('ready');
+    return setTimeout(() => row.classList.add('ready'), reduced ? 0 : index * 110);
+  });
+  void detectClient().then(system => { if (generation === bootGeneration) $('#boot-system').textContent = system; });
+  if (navigator.onLine) {
+    const timeout = setTimeout(() => request.abort(), 4500);
+    void sessionIP(request.signal).then(ip => {
+      if (generation === bootGeneration) $('#boot-ip').textContent = ip;
+    }).catch(() => {
+      if (generation === bootGeneration) $('#boot-ip').textContent = 'unavailable';
+    }).finally(() => clearTimeout(timeout));
+  }
 }
 $('#boot-trigger').addEventListener('click', showBoot);
-$('#boot-close').addEventListener('click', closeBoot);
 $('#boot-enter').addEventListener('click', closeBoot);
-boot.addEventListener('close', () => { bootTimers.forEach(clearTimeout); input.focus({ preventScroll: true }); });
-boot.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); closeBoot(); } });
+boot.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === 'Escape') { event.preventDefault(); closeBoot(); } });
 
 interface PaletteItem { title: string; detail: string; keywords: string; select: () => void }
 const paletteItems: PaletteItem[] = [
   ...routes.map(name => ({ title: `Open ${name}`, detail: 'page', keywords: name, select: () => { navigate(name); $(`#${name}`).focus({ preventScroll: true }); } })),
-  ...Object.entries(commandDescriptions).filter(([name]) => !['cd', 'cat', 'open', 'echo'].includes(name)).map(([name, description]) => ({ title: name, detail: description, keywords: `${name} ${description}`, select: () => { run(name); if (!boot.open && $('#matrix-overlay').hidden) input.focus({ preventScroll: true }); } })),
+  ...Object.entries(commandDescriptions).filter(([name]) => !['cd', 'cat', 'open', 'echo'].includes(name)).map(([name, description]) => ({ title: name, detail: description, keywords: `${name} ${description}`, select: () => { run(name); if (boot.hidden && $('#matrix-overlay').hidden) input.focus({ preventScroll: true }); } })),
   ...themes.map(value => ({ title: `Theme: ${value}`, detail: 'appearance', keywords: `theme ${value}`, select: () => setTheme(value) })),
   { title: 'Toggle effects', detail: 'accessibility', keywords: 'motion animation effects', select: () => setEffects(!effects) },
 ];
@@ -251,7 +286,7 @@ function renderPalette() {
   highlightResult();
 }
 function openPalette() {
-  if (boot.open || !$('#matrix-overlay').hidden) return;
+  if (!boot.hidden || !$('#matrix-overlay').hidden) return;
   search.value = '';
   palette.showModal();
   renderPalette();
@@ -277,7 +312,7 @@ document.addEventListener('keydown', event => {
 const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let sequenceIndex = 0;
 document.addEventListener('keydown', event => {
-  if (palette.open || boot.open || event.target instanceof HTMLInputElement) return;
+  if (palette.open || !boot.hidden || event.target instanceof HTMLInputElement) return;
   sequenceIndex = event.key === konami[sequenceIndex] ? sequenceIndex + 1 : event.key === konami[0] ? 1 : 0;
   if (sequenceIndex === konami.length) { sequenceIndex = 0; toast('ACCESS GRANTED · you found the easter egg. gg'); }
 });
@@ -286,6 +321,8 @@ function updateStatus() {
   $('#session-uptime').textContent = `session ${formatUptime(Date.now() - startedAt)}`;
   $('#perth-time').textContent = `${new Intl.DateTimeFormat('en-AU', { timeZone: 'Australia/Perth', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date())} Perth`;
   $('#connection-status').textContent = navigator.onLine ? 'online' : 'offline';
+  $('#boot-network').textContent = navigator.onLine ? 'interface up' : 'offline';
+  $('#boot-uptime').textContent = formatUptime(Date.now() - startedAt);
 }
 window.addEventListener('online', updateStatus);
 window.addEventListener('offline', updateStatus);
@@ -303,6 +340,7 @@ root.classList.add('js');
 routeFromHash();
 navigate(route, false);
 syncStatusTimer();
+showBoot();
 
 // Production precaches the built, hashed assets. Updates wait for the visitor.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {

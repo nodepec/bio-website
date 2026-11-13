@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 import compression from "compression";
 import helmet      from "helmet";
+import session from './api/session.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUB  = path.join(__dirname, "dist");
@@ -34,6 +35,7 @@ app.use(helmet({
   strictTransportSecurity: process.env.NODE_ENV === "production",
 }));
 app.use(compression());
+app.get('/api/session', session);
 app.use(express.static(PUB, {
   setHeaders(res, filePath) {
     res.setHeader("Cache-Control", filePath.includes(`${path.sep}assets${path.sep}`)

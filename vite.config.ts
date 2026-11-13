@@ -2,9 +2,14 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import { createServiceWorker } from './scripts/service-worker.mjs';
+import session from './api/session.js';
 
 export default defineConfig({
   plugins: [{
+    name: 'nodepec-session',
+    configureServer(server) { server.middlewares.use('/api/session', session); },
+    configurePreviewServer(server) { server.middlewares.use('/api/session', session); },
+  }, {
     name: 'nodepec-offline-shell',
     enforce: 'post',
     generateBundle(_, bundle) {

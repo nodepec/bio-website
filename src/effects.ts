@@ -1,4 +1,4 @@
-/** One canvas, one frame loop, with explicit cleanup and reduced-motion support. */
+/** Explicitly requested Matrix animation is independent of ambient motion preferences. */
 export function createMatrix(canvas: HTMLCanvasElement, onStop: () => void) {
   const overlay = canvas.parentElement!;
   const context = canvas.getContext('2d');
@@ -9,7 +9,6 @@ export function createMatrix(canvas: HTMLCanvasElement, onStop: () => void) {
   let width = 0;
   let height = 0;
   let returnFocus: HTMLElement | null = null;
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   function resize() {
     width = window.innerWidth;
@@ -52,11 +51,10 @@ export function createMatrix(canvas: HTMLCanvasElement, onStop: () => void) {
   function dismiss(event: KeyboardEvent) { event.preventDefault(); event.stopImmediatePropagation(); stop(); }
   document.querySelector('#matrix-stop')!.addEventListener('click', stop);
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
-  reducedMotion.addEventListener('change', () => { if (reducedMotion.matches) stop(); });
 
   return {
     start() {
-      if (!context || reducedMotion.matches || document.documentElement.dataset.motion === 'off') return false;
+      if (!context) return false;
       if (running) return true;
       returnFocus = document.activeElement as HTMLElement;
       overlay.hidden = false;

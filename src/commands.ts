@@ -70,7 +70,7 @@ export const commandDescriptions: Record<string, string> = {
   history: 'Show your command history',
   echo: 'Print text safely',
   theme: 'Set blue, cobalt, or ice',
-  effects: 'Turn optional motion on or off',
+  effects: 'Turn ambient motion on or off (Matrix stays available)',
   matrix: 'A familiar rabbit hole (Esc to exit)',
   clear: 'Clear the terminal',
   reboot: 'Replay the boot sequence',
@@ -129,7 +129,7 @@ export function execute(raw: string, context: CommandContext): CommandResult {
     case 'effects': {
       if (!argument) return { text: `Effects are ${context.effects ? 'on' : 'off'}. Usage: effects on | off` };
       if (args.length !== 1 || !['on', 'off'].includes(argument)) return fail('Usage: effects on | off');
-      return { text: `Effects ${argument}. Your system's reduced-motion preference is always respected.`, action: { type: 'effects', enabled: argument === 'on' } };
+      return { text: `Ambient effects ${argument}. The matrix command always runs when requested.`, action: { type: 'effects', enabled: argument === 'on' } };
     }
     case 'matrix': return { text: 'Follow the white rabbit. Press Esc to return.', action: { type: 'matrix' } };
     case 'reboot':
