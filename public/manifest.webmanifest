@@ -1,0 +1,11 @@
+{
+  "id": "/",
+  "name": "nodepec — session://bio",
+  "short_name": "nodepec",
+  "description": "nodepec. Web, CTFs and security. Perth, Australia.",
+  "theme_color": "#030507",
+  "background_color": "#030507",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
